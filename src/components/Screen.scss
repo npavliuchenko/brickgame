@@ -1,0 +1,47 @@
+@import '../style.scss';
+
+$border-vert: 10px;
+$border-hor: 20px;
+
+.screen {
+  background: $color-screen;
+  width: $digit-size * 15;
+  padding: 10px;
+  margin: 0 auto;
+  position: relative;
+
+  border-top: $border-vert solid darken($color-body-shadow, 2%);
+  border-left: $border-hor solid $color-body-shadow;
+  border-bottom: $border-vert solid lighten($color-body-light, 2%);
+  border-right: $border-hor solid $color-body-light;
+
+  box-shadow: inset 1px 1px 0 darken($color-body, 4%),
+    inset -1px -1px 0 $color-body,
+    0 0 2px lighten($color-body, 4%);
+
+  .decor-left,
+  .decor-right {
+    position: absolute;
+    top: -$border-vert;
+    color: $color-label;
+    height: calc(100% + #{$border-vert * 2});
+    width: auto;
+    margin: 0 ($border-hor * 2);
+  }
+
+  .decor-left {
+    right: 100%;
+  }
+
+  .decor-right {
+    left: 100%;
+
+  }
+}
+
+.board {
+  border: 2px solid $color-active-digit;
+
+  width: $digit-size * 10;
+  height: $digit-size * 20;
+}

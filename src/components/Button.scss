@@ -1,0 +1,99 @@
+@import '../style.scss';
+
+$small-button-size: 30px;
+$medium-button-size: 60px;
+$large-button-size: 90px;
+
+$button-height: 3px;
+$button-facet: 2px;
+$button-shadow: 4px;
+
+button {
+  background: $color-button;
+  width: $medium-button-size;
+  height: $medium-button-size;
+  border-radius: 50%;
+  vertical-align: top;
+  // border: 1px solid rgba(black, .5);
+  border: none;
+  outline: 0;
+  position: relative;
+
+  box-shadow: inset 0 0 1px $color-button,          // bright inner light
+    inset 1px 1px 15px rgba(white, .75),            // smooth inner light
+    inset -1px -1px 13px rgba(black, .1),           // smooth inner shadow
+    0 $button-height 0 darken($color-button, 10%),  // button height
+    0 $button-height 1px rgba(black, .99),          // facet
+    -$button-facet ($button-height - $button-facet) 1px $color-body-shadow,           // facet shadow
+    $button-shadow ($button-height + $button-shadow) $button-shadow rgba(black, .15), // drop shadow
+    $button-facet ($button-height + $button-facet) 1px $color-body-light;             // facet light
+
+  span {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 10px;
+
+    color: $color-label;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-shadow: 0 0 1px $color-label;
+  }
+
+  &:active {
+    box-shadow: inset 0 0 1px $color-button,  // bright inner light
+      inset 1px 1px 15px rgba(white, .75),    // smooth inner light
+      inset -1px -1px 13px rgba(black, .1),   // smooth inner shadow
+      0 0 0 darken($color-button, 10%),       // button height
+      0 0 1px rgba(black, .99),               // facet
+      -$button-facet $button-facet 1px $color-body-shadow,        // facet shadow
+      $button-facet $button-facet $button-facet rgba(black, .15), // drop shadow
+      $button-facet $button-facet 1px $color-body-light;          // facet light
+    top: 3px;
+
+    span {
+      margin-top: 10px - 3px;
+    }
+  }
+
+  &%small {
+    width: $small-button-size;
+    height: $small-button-size;
+  }
+
+  &%large {
+    width: $large-button-size;
+    height: $large-button-size;
+  }
+
+  &.start {
+    @extend %small;
+  }
+
+  &.rotate {
+    @extend %large;
+    margin-top: $large-button-size / -9;
+  }
+
+  &.down {
+    margin-top: $medium-button-size;
+  }
+}
+
+.game-controls {
+  text-align: center;
+
+  margin: $digit-size 0;
+}
+
+.move-controls {
+  float: left;
+  margin: $digit-size 0;
+}
+
+.action-controls {
+  float: right;
+  margin: $digit-size 0;
+}
