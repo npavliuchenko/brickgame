@@ -3,6 +3,10 @@
 $border-vert: 10px;
 $border-hor: 20px;
 
+$digit-margin: 2px;
+$digit-border: 2px;
+$digit-padding: 2px;
+
 .screen {
   background: $color-screen;
   width: $digit-size * 15;
@@ -44,4 +48,34 @@ $border-hor: 20px;
 
   width: $digit-size * 10;
   height: $digit-size * 20;
+
+  > div {
+    clear: both;
+  }
+
+  .digit {
+    float: left;
+    width: $digit-size - $digit-margin;
+    height: $digit-size - $digit-margin;
+    border: $digit-border solid $color-passive-digit;
+    box-sizing: border-box;
+    margin: $digit-margin / 2;
+    padding: $digit-padding;
+
+    &::before {
+      content: '';
+      display: block;
+      width: $digit-size - $digit-margin - $digit-border * 2 - $digit-padding * 2;
+      height: $digit-size - $digit-margin - $digit-border * 2 - $digit-padding * 2;
+      background: $color-passive-digit;
+    }
+
+    &.active {
+      border-color: $color-active-digit;
+
+      &::before {
+        background: $color-active-digit;
+      }
+    }
+  }
 }

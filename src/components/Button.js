@@ -10,7 +10,7 @@ class Button extends React.Component {
 
     switch (this.props.type) {
         case 'start' : {
-            label = 'start / pause';
+            label = 'start pause';
             break;
         }
         default: {
