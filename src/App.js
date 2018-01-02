@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {BOARD_WIDTH, BOARD_HEIGHT, FIGURES} from './utils/constants';
-import {random, div, createMatrix, rotateMatrix} from './utils/math';
+import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, FIGURES} from './utils/constants';
+import {random, div, createMatrix, rotateMatrix, mergeMatrix, getFloorDistance} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
 
@@ -12,15 +12,28 @@ class App extends React.Component {
     super(props);
     this.state = {
       board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
+      // current: {
+      //   figure: this.randomFigure(),
+      //   x: div(BOARD_WIDTH - FIGURES[0][0].length, 2),
+      //   y: -2
+      // },
       current: {
-        figure: this.randomFigure(),
-        x: div(BOARD_WIDTH - FIGURES[0][0].length, 2),
-        y: -2
+        figure: [[0]],
+        x: 0,
+        y: 0
       },
       next: this.randomFigure()
     };
 
     this.test();
+
+    //@TODO: change to recursive setTimeout to change speeds
+    //       test the time difference (delays for tick run)
+    console.log(this);
+    this.floorDistance = 0;
+    this.limit = 100;
+    this.timer = setInterval(this.tick.bind(this), SPEED_TICK);
+    // this.timer = setInterval(this.tick, SPEED_TICK);
   }
 
   test() {
@@ -39,14 +52,62 @@ class App extends React.Component {
   }
 
   tick() { // update game state
+    //@TODO: remove
+    this.limit--;
+    if (this.limit <= 0) {
+      clearInterval(this.timer);
+    }
+
     // check if current figure is down
     // yes:
-    //    move figure to board layer
-    //    check score
-    //    next->current figure
-    //    update next
+    if (this.floorDistance === 0) {
+      //@TODO: check for game over
+
+      this.setState((prevState, props) => {
+        // move figure to board layer
+        const board = mergeMatrix(
+          prevState.board,
+          prevState.current.figure,
+          prevState.current.y,
+          prevState.current.x
+        );
+
+        //@TODO: check score
+
+        const xOffset = div(BOARD_WIDTH - FIGURES[0][0].length, 2)
+        const yOffset = -2;
+
+        this.floorDistance = getFloorDistance( board, prevState.next, yOffset, xOffset);
+        //@TODO: may be better to store the array, so not recalc on moves
+
+        console.log(this);
+
+        // update next & current figures
+        return {
+          board: board,
+          current: {
+            figure: prevState.next,
+            x: xOffset,
+            y: yOffset
+          },
+          next: this.randomFigure()
+        };
+      });
     // no:
-    //    move figure
+    } else {
+      // move figure
+      this.floorDistance--;
+
+      this.setState((prevState, props) => ({
+        current: {
+          figure: prevState.current.figure,
+          x: prevState.current.x,
+          y: prevState.current.y + 1
+        }
+      }));
+    }
+
+    console.log(this.limit, this.floorDistance);
   }
 
   render() {

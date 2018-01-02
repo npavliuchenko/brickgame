@@ -61,6 +61,7 @@ $digit-padding: 2px;
     box-sizing: border-box;
     margin: $digit-margin / 2;
     padding: $digit-padding;
+    //@TODO: brightness
 
     &::before {
       content: '';

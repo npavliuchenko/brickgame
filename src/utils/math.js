@@ -67,6 +67,7 @@ function mergeMatrix(environment, insertion, yOffset, xOffset) {
   const width = environment[0].length;
   const height = environment.length;
 
+  // for each cell AND() `environment` and `insertion`
   for (let i = 0; i < insertion.length; i++) {
     for (let j = 0; j < insertion[0].length; j++) {
       if ((yOffset + i >= 0) && (yOffset + i < height)
@@ -82,6 +83,46 @@ function mergeMatrix(environment, insertion, yOffset, xOffset) {
   return result;
 }
 
+function getFloorDistance(environment, insertion, yOffset, xOffset) {
+  let minFloorDistance = environment.length;
+
+  // for each column of `insertion`
+  for (let j = 0; j < insertion[0].length; j++) {
+    let jEnv = j + xOffset;
+    let insertionBase = -1;
+    let environmentFloor = environment.length;
+
+    // find the lowest cell
+    for (let i = insertion.length - 1; i >= 0; i--) { //@TODO: use insertionBase as an 'until' limiter ?
+      if (insertion[i][j]) {
+        insertionBase = i;
+        i = 0;
+      }
+    }
+
+    // and get the distance for the nearest cell of `environment`
+    if (insertionBase !== -1) {
+      for (let i = yOffset + insertion.length - 1; i < environmentFloor; i++) {
+        if (environment[i][jEnv]) {
+          environmentFloor = i;
+        }
+      }
+    }
+
+    minFloorDistance = Math.min(minFloorDistance, environmentFloor - yOffset - insertionBase - 1);
+  }
+
+  return minFloorDistance;
+}
+
+function getLeftBorder(insertion) {
+  return insertion[0].length;
+}
+
+function getRightBorder(insertion) {
+  return insertion[0].length;
+}
+
 // function canMergeMatrix()
 
-export {random, div, createMatrix, copyMatrix, rotateMatrix, mergeMatrix};
+export {random, div, createMatrix, copyMatrix, rotateMatrix, mergeMatrix, getFloorDistance};

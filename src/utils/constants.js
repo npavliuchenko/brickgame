@@ -1,5 +1,6 @@
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
+const SPEED_TICK = 500;
 
 const FIGURES = [
   [ [0,1,0,0],  // I
@@ -38,4 +39,4 @@ const FIGURES = [
     [0,0,0,0] ],
 ];
 
-export {BOARD_WIDTH, BOARD_HEIGHT, FIGURES};
+export {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, FIGURES};

@@ -69,3 +69,31 @@ test('mergeMatrix(environment, insertion, yOffset, xOffset)', () => {
   expect(M.mergeMatrix(m0, m1, 1, 2)).toEqual([[1,0,0,0],[0,1,1,1],[0,0,0,1]]);
   //@TODO: exceptions (out of border), also <0
 });
+
+test('getFloorDistance(environment, insertion, yOffset, xOffset)', () => {
+  const e1 = M.createMatrix(10, 5);
+  const e2 = M.copyMatrix(e1);
+  e2[9] = [0,0,1,1,0];
+  const e3 = M.copyMatrix(e1);
+  e3[5] = [0,1,0,1,0];
+  const m1 = [[0,0,0],[0,1,0],[0,0,0]];
+  const m2 = [[0,1,0],[1,1,0],[0,1,0]];
+
+  expect(M.getFloorDistance(e1, m1, 0, 1)).toEqual(8);
+  expect(M.getFloorDistance(e1, m1, 2, 3)).toEqual(6);
+  expect(M.getFloorDistance(e1, m2, 0, 1)).toEqual(7);
+  expect(M.getFloorDistance(e1, m2, 1, 1)).toEqual(6);
+
+  expect(M.getFloorDistance(e2, m1, 0, 1)).toEqual(7);
+  expect(M.getFloorDistance(e2, m1, 2, 3)).toEqual(6);
+  expect(M.getFloorDistance(e2, m2, 0, 0)).toEqual(7);
+  expect(M.getFloorDistance(e2, m2, 0, 1)).toEqual(6);
+  expect(M.getFloorDistance(e2, m2, 0, 3)).toEqual(7);
+
+  expect(M.getFloorDistance(e3, m1, 1, -1)).toEqual(7);
+  expect(M.getFloorDistance(e3, m1, 1, 0)).toEqual(2);
+  expect(M.getFloorDistance(e3, m2, 0, 0)).toEqual(2);
+  expect(M.getFloorDistance(e3, m2, 0, 1)).toEqual(3);
+  expect(M.getFloorDistance(e3, m2, 1, 3)).toEqual(2);
+  expect(M.getFloorDistance(e3, m2, 3, 3)).toEqual(0);
+});
