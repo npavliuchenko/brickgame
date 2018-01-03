@@ -51,7 +51,6 @@ function rotateMatrixCCW(m) {
   );
 }
 
-//@TEST: angle 0 - no changes, 1CW = 3CCW, 3CW = 1CCW, 4CW = m, 4CCW = m, 1CW manual check
 function rotateMatrix(m, angle) { // angle > 0 ? CW : CCW
   let result = copyMatrix(m);
 
@@ -62,12 +61,12 @@ function rotateMatrix(m, angle) { // angle > 0 ? CW : CCW
   return result;
 }
 
-function mergeMatrix(environment, insertion, yOffset, xOffset) {
-  const result = copyMatrix(environment);
-  const width = environment[0].length;
-  const height = environment.length;
+function mergeMatrix(container, insertion, yOffset, xOffset) {
+  const result = copyMatrix(container);
+  const width = container[0].length;
+  const height = container.length;
 
-  // for each cell AND() `environment` and `insertion`
+  // for each cell AND() `container` and `insertion`
   for (let i = 0; i < insertion.length; i++) {
     for (let j = 0; j < insertion[0].length; j++) {
       if ((yOffset + i >= 0) && (yOffset + i < height)
@@ -78,51 +77,33 @@ function mergeMatrix(environment, insertion, yOffset, xOffset) {
     }
   }
 
-  // console.log(result);
-
   return result;
 }
 
-function getFloorDistance(environment, insertion, yOffset, xOffset) {
-  let minFloorDistance = environment.length;
+function hasOverflow(container, insertion, yOffset, xOffset) {
+  const conWidth = container[0].length;
+  const conHeight = container.length;
+  const insWidth = insertion[0].length;
+  const insHeight = insertion.length;
+  // console.log(insertion);
 
-  // for each column of `insertion`
-  for (let j = 0; j < insertion[0].length; j++) {
-    let jEnv = j + xOffset;
-    let insertionBase = -1;
-    let environmentFloor = environment.length;
-
-    // find the lowest cell
-    for (let i = insertion.length - 1; i >= 0; i--) { //@TODO: use insertionBase as an 'until' limiter ?
+  //@TODO: can optimize ?
+  for (let i = 0; i < insHeight; i++) {
+    for (let j = 0; j < insWidth; j++) {
       if (insertion[i][j]) {
-        insertionBase = i;
-        i = 0;
+        let iContainer = i + yOffset;
+        let jContainer = j + xOffset;
+        // console.log(yOffset, xOffset,':',i,j,' - ',iContainer,jContainer);
+
+        if ( iContainer >= conHeight // exclude top border
+          || jContainer >= conWidth || jContainer < 0
+          || (iContainer >= 0 && container[iContainer][jContainer])
+        ) return true;
       }
     }
-
-    // and get the distance for the nearest cell of `environment`
-    if (insertionBase !== -1) {
-      for (let i = yOffset + insertion.length - 1; i < environmentFloor; i++) {
-        if (environment[i][jEnv]) {
-          environmentFloor = i;
-        }
-      }
-    }
-
-    minFloorDistance = Math.min(minFloorDistance, environmentFloor - yOffset - insertionBase - 1);
   }
 
-  return minFloorDistance;
+  return false;
 }
 
-function getLeftBorder(insertion) {
-  return insertion[0].length;
-}
-
-function getRightBorder(insertion) {
-  return insertion[0].length;
-}
-
-// function canMergeMatrix()
-
-export {random, div, createMatrix, copyMatrix, rotateMatrix, mergeMatrix, getFloorDistance};
+export {random, div, createMatrix, copyMatrix, rotateMatrix, mergeMatrix, hasOverflow};

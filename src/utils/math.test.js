@@ -1,4 +1,5 @@
 import * as M from './math';
+import {BOARD_WIDTH, BOARD_HEIGHT, START_X_OFFSET} from './constants';
 
 test('random(max)', () => {
   // test the random values interval
@@ -61,7 +62,7 @@ test('copyMatrix(m)', () => {
   expect(m1).not.toEqual(m0); // but not connected
 });
 
-test('mergeMatrix(environment, insertion, yOffset, xOffset)', () => {
+test('mergeMatrix(container, insertion, yOffset, xOffset)', () => {
   const m0 = [[1,0,0,0],[0,1,0,0],[0,0,0,1]];
   const m1 = [[1,1],[0,1]];
   expect(M.mergeMatrix(m0, m1, 0, 0)).toEqual([[1,1,0,0],[0,1,0,0],[0,0,0,1]]);
@@ -70,30 +71,91 @@ test('mergeMatrix(environment, insertion, yOffset, xOffset)', () => {
   //@TODO: exceptions (out of border), also <0
 });
 
-test('getFloorDistance(environment, insertion, yOffset, xOffset)', () => {
+test('hasOverflow(container, insertion, yOffset, xOffset)', () => {
+  const e0 = M.createMatrix(BOARD_HEIGHT, BOARD_WIDTH);
   const e1 = M.createMatrix(10, 5);
   const e2 = M.copyMatrix(e1);
-  e2[9] = [0,0,1,1,0];
-  const e3 = M.copyMatrix(e1);
-  e3[5] = [0,1,0,1,0];
+  e2[5] = [0,1,0,1,0];
+  const m0 = [[1]];
   const m1 = [[0,0,0],[0,1,0],[0,0,0]];
   const m2 = [[0,1,0],[1,1,0],[0,1,0]];
 
-  expect(M.getFloorDistance(e1, m1, 0, 1)).toEqual(8);
-  expect(M.getFloorDistance(e1, m1, 2, 3)).toEqual(6);
-  expect(M.getFloorDistance(e1, m2, 0, 1)).toEqual(7);
-  expect(M.getFloorDistance(e1, m2, 1, 1)).toEqual(6);
+  // board borders intersections
+  // somewhere inside
+  expect(M.hasOverflow(e1, m1, 0, 0)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 6, 1)).toEqual(false);
+  // left border
+  expect(M.hasOverflow(e1, m1, 1, -1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 1, -2)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 1, -3)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 1, -5)).toEqual(true);
+  // top border
+  expect(M.hasOverflow(e1, m1, -1, 1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, -2, 1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, -3, 1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, -5, 1)).toEqual(false);
+  // right border
+  expect(M.hasOverflow(e1, m1, 1, 3)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 1, 4)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 1, 5)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 1, 7)).toEqual(true);
+  // bottom border
+  expect(M.hasOverflow(e1, m1, 8, 2)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 9, 2)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 10, 2)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 12, 2)).toEqual(true);
+  // corners
+  expect(M.hasOverflow(e1, m1, -1, -1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, -2, -2)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, -1, 3)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, -2, 4)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 8, -1)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 9, -2)).toEqual(true);
+  expect(M.hasOverflow(e1, m1, 8, 3)).toEqual(false);
+  expect(M.hasOverflow(e1, m1, 9, 4)).toEqual(true);
 
-  expect(M.getFloorDistance(e2, m1, 0, 1)).toEqual(7);
-  expect(M.getFloorDistance(e2, m1, 2, 3)).toEqual(6);
-  expect(M.getFloorDistance(e2, m2, 0, 0)).toEqual(7);
-  expect(M.getFloorDistance(e2, m2, 0, 1)).toEqual(6);
-  expect(M.getFloorDistance(e2, m2, 0, 3)).toEqual(7);
+  // the same for more complicated figure
+  // somewhere inside
+  expect(M.hasOverflow(e1, m2, 6, 1)).toEqual(false);
+  // left border
+  expect(M.hasOverflow(e1, m2, 1, 0)).toEqual(false);
+  expect(M.hasOverflow(e1, m2, 1, -1)).toEqual(true);
+  // top border
+  expect(M.hasOverflow(e1, m2, 0, 1)).toEqual(false);
+  expect(M.hasOverflow(e1, m2, -1, 1)).toEqual(false);
+  // right border
+  expect(M.hasOverflow(e1, m2, 1, 3)).toEqual(false);
+  expect(M.hasOverflow(e1, m2, 1, 4)).toEqual(true);
+  // bottom border
+  expect(M.hasOverflow(e1, m2, 7, 2)).toEqual(false);
+  expect(M.hasOverflow(e1, m2, 8, 2)).toEqual(true);
 
-  expect(M.getFloorDistance(e3, m1, 1, -1)).toEqual(7);
-  expect(M.getFloorDistance(e3, m1, 1, 0)).toEqual(2);
-  expect(M.getFloorDistance(e3, m2, 0, 0)).toEqual(2);
-  expect(M.getFloorDistance(e3, m2, 0, 1)).toEqual(3);
-  expect(M.getFloorDistance(e3, m2, 1, 3)).toEqual(2);
-  expect(M.getFloorDistance(e3, m2, 3, 3)).toEqual(0);
+  // board content intersection
+  expect(M.hasOverflow(e2, m2, 2, 0)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 2, 1)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 2, 2)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 2, 3)).toEqual(false);
+
+  expect(M.hasOverflow(e2, m2, 3, 0)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 3, 1)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 3, 2)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 3, 3)).toEqual(false);
+
+  expect(M.hasOverflow(e2, m2, 4, 0)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 4, 1)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 4, 2)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 4, 4)).toEqual(true);
+
+  expect(M.hasOverflow(e2, m2, 5, 0)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 5, 1)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 5, 2)).toEqual(true);
+  expect(M.hasOverflow(e2, m2, 5, 3)).toEqual(false);
+
+  expect(M.hasOverflow(e2, m2, 6, 0)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 6, 1)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 6, 2)).toEqual(false);
+  expect(M.hasOverflow(e2, m2, 6, 3)).toEqual(false);
+
+  // initial position test
+  expect(M.hasOverflow(e0, m0, BOARD_HEIGHT, START_X_OFFSET)).toEqual(true);
 });
