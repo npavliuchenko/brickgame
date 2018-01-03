@@ -152,15 +152,16 @@ class App extends React.Component {
     });
   }
 
-  handleDown(isActive) {
-    DEBUG && console.log('down key', isActive ? 'on' : 'off');
+  handleLongPress(keyName, isActive, action) {
+    DEBUG && console.log(keyName + ' button', isActive ? 'on' : 'off');
 
     if (isActive) {
-      this.keys.down = setInterval(() => {
-        this.tick();
+      action();
+      this.keys[keyName] = setInterval(() => {
+        action();
       }, SPEED_TICK / CONTROLS_SENSIVITY);
     } else {
-      clearInterval(this.keys.down);
+      clearInterval(this.keys[keyName]);
     }
   }
 
@@ -179,9 +180,18 @@ class App extends React.Component {
           </div>
 
           <div className="move-controls">
-            <Button type="left" onClick={() => this.handleMove(-1)} />
-            <Button type="down" onMouseDown={() => this.handleDown(true)} onMouseUp={() => this.handleDown(false)} />
-            <Button type="right" onClick={() => this.handleMove(1)} />
+            <Button type="left"
+              onMouseDown={() => this.handleLongPress('left', true, () => {this.handleMove(-1)}) }
+              onMouseUp={() => this.handleLongPress('left', false, () => {this.handleMove(-1)}) }
+            />
+            <Button type="down"
+              onMouseDown={() => this.handleLongPress('down', true, () => {this.tick()}) }
+              onMouseUp={() => this.handleLongPress('down', false, () => {this.tick()}) }
+            />
+            <Button type="right"
+              onMouseDown={() => this.handleLongPress('right', true, () => {this.handleMove(1)}) }
+              onMouseUp={() => this.handleLongPress('right', false, () => {this.handleMove(1)}) }
+            />
           </div>
 
           <div className="action-controls">
