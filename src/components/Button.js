@@ -19,7 +19,12 @@ class Button extends React.Component {
     }
 
     return (
-        <button className={this.props.type} onClick={this.props.onClick}>
+        <button
+            className={this.props.type}
+            onClick={this.props.onClick}
+            onMouseDown={this.props.onMouseDown}
+            onMouseUp={this.props.onMouseUp}
+        >
             <span>{label}</span>
         </button>
     );

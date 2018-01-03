@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET} from './utils/constants';
+import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY, ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET} from './utils/constants';
 import {random, createMatrix, rotateMatrix, mergeMatrix, hasOverflow} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
@@ -22,12 +22,11 @@ class App extends React.Component {
       },
       next: this.getRandomFigure()
     };
-
-    //@TODO: use recursive setTimeout to change speeds
-    //       test the time difference (delays for tick run)
-    DEBUG && console.log(this);
+    this.keys = {};
 
     this.handlePause('stop');
+
+    DEBUG && console.log(this);
   }
 
   getRandomFigure() {
@@ -94,6 +93,8 @@ class App extends React.Component {
       clearInterval(this.timer);
       this.timer = null;
     } else {
+      //@TODO: use recursive setTimeout to change speeds
+      //       test the time difference (delays for tick run)
       this.timer = setInterval(this.tick.bind(this), SPEED_TICK);
       this.limit = DEBUG_TICKS_LIMIT;
     }
@@ -151,8 +152,16 @@ class App extends React.Component {
     });
   }
 
-  handleDown() {
+  handleDown(isActive) {
+    DEBUG && console.log('down key', isActive ? 'on' : 'off');
 
+    if (isActive) {
+      this.keys.down = setInterval(() => {
+        this.tick();
+      }, SPEED_TICK / CONTROLS_SENSIVITY);
+    } else {
+      clearInterval(this.keys.down);
+    }
   }
 
   handleKeyboard(e) {
@@ -171,7 +180,7 @@ class App extends React.Component {
 
           <div className="move-controls">
             <Button type="left" onClick={() => this.handleMove(-1)} />
-            <Button type="down" onClick={() => this.handleDown()} />
+            <Button type="down" onMouseDown={() => this.handleDown(true)} onMouseUp={() => this.handleDown(false)} />
             <Button type="right" onClick={() => this.handleMove(1)} />
           </div>
 
