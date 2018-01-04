@@ -159,3 +159,39 @@ test('hasOverflow(container, insertion, yOffset, xOffset)', () => {
   // initial position test
   expect(M.hasOverflow(e0, m0, BOARD_HEIGHT, START_X_OFFSET)).toEqual(true);
 });
+
+test('clearLines(m, first, last)', () => {
+  const m0 = M.createMatrix(10, 5);
+  const m1 = [[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]];
+  const m2 = [[1,0,1],[1,1,1],[0,0,1],[1,1,0],[1,1,1]];
+
+  expect(M.clearLines(m0)).toEqual([0, m0]);
+
+  expect(M.clearLines(m1)).toEqual(      [5, [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]]);
+  expect(M.clearLines(m1, -2)).toEqual(  [5, [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]]);
+  expect(M.clearLines(m1, 0)).toEqual(   [5, [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]]);
+  expect(M.clearLines(m1, 1)).toEqual(   [4, [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[1,1,1]]]);
+  expect(M.clearLines(m1, 4)).toEqual(   [1, [[0,0,0],[1,1,1],[1,1,1],[1,1,1],[1,1,1]]]);
+  expect(M.clearLines(m1, 5)).toEqual(   [0, m1]);
+  expect(M.clearLines(m1, 0, 0)).toEqual([1, [[0,0,0],[1,1,1],[1,1,1],[1,1,1],[1,1,1]]]);
+  expect(M.clearLines(m1, 0, 1)).toEqual([2, [[0,0,0],[0,0,0],[1,1,1],[1,1,1],[1,1,1]]]);
+  expect(M.clearLines(m1, 1, 3)).toEqual([3, [[0,0,0],[0,0,0],[0,0,0],[1,1,1],[1,1,1]]]);
+  expect(M.clearLines(m1, 1, 9)).toEqual([4, [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[1,1,1]]]);
+
+  expect(M.clearLines(m2)).toEqual(      [2, [[0,0,0],[0,0,0],[1,0,1],[0,0,1],[1,1,0]]]);
+  expect(M.clearLines(m2, 0, 0)).toEqual([0, m2]);
+  expect(M.clearLines(m2, 0, 1)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 0, 2)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 0, 3)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 0, 4)).toEqual([2, [[0,0,0],[0,0,0],[1,0,1],[0,0,1],[1,1,0]]]);
+  expect(M.clearLines(m2, 1, 1)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 1, 2)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 1, 3)).toEqual([1, [[0,0,0],[1,0,1],[0,0,1],[1,1,0],[1,1,1]]]);
+  expect(M.clearLines(m2, 1, 4)).toEqual([2, [[0,0,0],[0,0,0],[1,0,1],[0,0,1],[1,1,0]]]);
+  expect(M.clearLines(m2, 2, 2)).toEqual([0, m2]);
+  expect(M.clearLines(m2, 2, 3)).toEqual([0, m2]);
+  expect(M.clearLines(m2, 2, 4)).toEqual([1, [[0,0,0],[1,0,1],[1,1,1],[0,0,1],[1,1,0]]]);
+  expect(M.clearLines(m2, 3, 3)).toEqual([0, m2]);
+  expect(M.clearLines(m2, 3, 4)).toEqual([1, [[0,0,0],[1,0,1],[1,1,1],[0,0,1],[1,1,0]]]);
+  expect(M.clearLines(m2, 4, 4)).toEqual([1, [[0,0,0],[1,0,1],[1,1,1],[0,0,1],[1,1,0]]]);
+});

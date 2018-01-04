@@ -2,9 +2,9 @@ import React from 'react';
 
 import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY,
   ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET,
-  KEYBOARD_KEYS} from './utils/constants';
+  KEYBOARD_KEYS, SCORE_BONUS} from './utils/constants';
 import {random, createMatrix, rotateMatrix, mergeMatrix,
-  hasOverflow} from './utils/math';
+  hasOverflow, clearLines} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
 
@@ -23,7 +23,8 @@ class App extends React.Component {
         x: START_X_OFFSET,
         y: BOARD_HEIGHT
       },
-      next: this._getRandomFigure()
+      next: this._getRandomFigure(),
+      score: 0
     };
     this.keys = {};
 
@@ -80,18 +81,32 @@ class App extends React.Component {
     // if current figure is already down:
     } else {
       //@TODO: check for game over
-      //@TODO: check score
 
       this.setState((prevState, props) => {
-        // move figure to board layer
-        const board = mergeMatrix(
-          prevState.board,
-          prevState.current.figure,
+
+        // const board = mergeMatrix(
+        //   prevState.board,
+        //   prevState.current.figure,
+        //   prevState.current.y,
+        //   prevState.current.x
+        // );
+
+        // remove the full lines
+        const [linesCleared, board] = clearLines(
+          // move figure to board layer
+          mergeMatrix(
+            prevState.board,
+            prevState.current.figure,
+            prevState.current.y,
+            prevState.current.x
+          ),
           prevState.current.y,
-          prevState.current.x
+          prevState.current.y + prevState.current.figure.length - 1
         );
 
-        // update next & current figures
+        DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared]);
+
+        // update next & current figures, score
         return {
           board: board,
           current: {
@@ -99,7 +114,8 @@ class App extends React.Component {
             x: START_X_OFFSET,
             y: START_Y_OFFSET
           },
-          next: this._getRandomFigure()
+          next: this._getRandomFigure(),
+          score: prevState.score + SCORE_BONUS[linesCleared]
         };
       });
     }
@@ -227,6 +243,7 @@ class App extends React.Component {
           board={this.state.board}
           current={this.state.current}
           next={this.state.next}
+          score={this.state.score}
         />
 
         <div className="controls">

@@ -50,7 +50,15 @@ const KEYBOARD_KEYS = {
   KeyS: 'down',
   KeyD: 'right',
   KeyW: 'rotate'
-}
+};
+
+const SCORE_BONUS = {
+  0: 0,
+  1: 100,
+  2: 300,
+  3: 700,
+  4: 1500
+};
 
 const START_X_OFFSET = Math.floor((BOARD_WIDTH - FIGURES[0][0].length) / 2);
 const START_Y_OFFSET = -2;
@@ -64,6 +72,7 @@ export {
   SCORE_DIGITS,
   FIGURES,
   KEYBOARD_KEYS,
+  SCORE_BONUS,
   START_X_OFFSET,
   START_Y_OFFSET
 };

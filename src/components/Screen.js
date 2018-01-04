@@ -27,7 +27,7 @@ class Screen extends React.Component {
         <SvgOrnament className="decor-right" />
         <Board content={boardState} className="board" />
         <Board content={this.props.next} className="next" />
-        <ScoreBoard content={0} />
+        <ScoreBoard content={this.props.score} />
         <NumberBoard content={1} className="speed" />
         <NumberBoard content={1} className="level" />
         {/*<div className="rotate"></div>

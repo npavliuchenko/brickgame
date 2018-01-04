@@ -106,4 +106,41 @@ function hasOverflow(container, insertion, yOffset, xOffset) {
   return false;
 }
 
-export {random, div, createMatrix, copyMatrix, rotateMatrix, mergeMatrix, hasOverflow};
+function clearLines(m, first, last) {
+  const rowToStart = (first === undefined || first < 0) ? 0 : first;
+  const rowToFinish = (last === undefined || last > m.length - 1) ? m.length - 1 : last;
+  const result = copyMatrix(m);
+  const rowLength = m[0].length;
+  const linesToClear = [];
+
+  // get the lines to clear
+  for (let i = rowToStart; i <= rowToFinish; i++) {
+    let flag = true;
+    for (let j = 0; j < m[0].length; j++) {
+      flag = flag && m[i][j];
+    }
+    if (flag) {
+      linesToClear.push(i);
+    }
+  }
+
+  // update matrix
+  //@TODO: refactor ?
+  for (let i = 0; i < linesToClear.length; i++) {
+    result.splice(linesToClear[i], 1);
+    result.unshift(Array(rowLength).fill(0));
+  }
+
+  return [linesToClear.length, result];
+}
+
+export {
+  random,
+  div,
+  createMatrix,
+  copyMatrix,
+  rotateMatrix,
+  mergeMatrix,
+  hasOverflow,
+  clearLines
+};
