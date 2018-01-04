@@ -166,30 +166,6 @@ class App extends React.Component {
     });
   }
 
-  handleLongPress(e) {
-    e.persist(); // to freeze the React event
-
-    DEBUG && console.log(e.target.className + ' button', e.type === 'mousedown' ? 'on' : 'off');
-
-    if (e.type === 'mousedown') {
-      this.runAction(e.target.className);
-
-      this.keys[e.target.className] = setInterval(() => {
-        this.runAction(e.target.className);
-      }, SPEED_TICK / CONTROLS_SENSIVITY);
-    } else {
-      clearInterval(this.keys[e.target.className]);
-    }
-  }
-
-  handleKeyboard = (e) => { // fix App as context
-    DEBUG && console.log(e.code, e.type, e);
-
-    if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
-      this.runAction(KEYBOARD_KEYS[e.code]);
-    }
-  }
-
   runAction(actionName) {
     const actionHandlers = {
       start:  () => { this.handlePause() },
@@ -204,6 +180,37 @@ class App extends React.Component {
     }
   }
 
+  handleLongPress = (e) => { // fix App as context
+    // e.persist(); // to freeze the React event
+    const actionName = e.target.className;
+
+    DEBUG && console.log(actionName + ' button', e.type === 'mousedown' ? 'on' : 'off');
+
+    if (e.type === 'mousedown') {
+      this.runAction(actionName);
+
+      this.keys[actionName] = setInterval(() => {
+        this.runAction(actionName);
+      }, SPEED_TICK / CONTROLS_SENSIVITY);
+    } else {
+      clearInterval(this.keys[actionName]);
+    }
+  }
+
+  handleShortPress = (e) => { // fix App as context
+    DEBUG && console.log(e.target.className + ' button');
+    this.runAction(e.target.className);
+  }
+
+  handleKeyboard = (e) => { // fix App as context
+    DEBUG && console.log(e.code, e.type, e);
+
+    if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
+      e.preventDefault();
+      this.runAction(KEYBOARD_KEYS[e.code]);
+    }
+  }
+
   render() {
     return (
       <div className="app" tabIndex="0">
@@ -211,26 +218,28 @@ class App extends React.Component {
 
         <div className="controls">
           <div className="game-controls">
-            <Button type="start" onClick={() => this.handlePause()} />
+            <Button type="start" onClick={this.handleShortPress} />
           </div>
 
           <div className="move-controls">
             <Button type="left"
-              onMouseDown={(e) => this.handleLongPress(e) }
-              onMouseUp={(e) => this.handleLongPress(e) }
+              onMouseDown={this.handleLongPress}
+              onMouseUp={this.handleLongPress}
             />
             <Button type="down"
-              onMouseDown={(e) => this.handleLongPress(e) }
-              onMouseUp={(e) => this.handleLongPress(e) }
+              onMouseDown={this.handleLongPress}
+              onMouseUp={this.handleLongPress}
             />
             <Button type="right"
-              onMouseDown={(e) => this.handleLongPress(e) }
-              onMouseUp={(e) => this.handleLongPress(e) }
+              onMouseDown={this.handleLongPress}
+              onMouseUp={this.handleLongPress}
             />
           </div>
 
           <div className="action-controls">
-            <Button type="rotate" onClick={() => this.handleRotate()} />
+            <Button type="rotate"
+              onMouseDown={this.handleLongPress}
+              onMouseUp={this.handleLongPress} />
           </div>
         </div>
       </div>
