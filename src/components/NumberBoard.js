@@ -1,5 +1,5 @@
 import React from 'react';
-// import './Board.scss';
+// import './NumberBoard.scss';
 
 
 
@@ -35,33 +35,17 @@ class NumberBoard extends React.Component {
     let result = [];
     const prepared = source.toString().toLowerCase();
 
-    // console.log(source, prepared, prepared.length);
-
     for (let i = 0; i < prepared.length; i++) {
       let digit = translationMap.hasOwnProperty(prepared[i]) ? prepared[i] : placeholder;
       let digitConverted = translationMap[digit];
 
       result.push(digitConverted);
-      // console.log(digit, digitConverted);
     }
 
     return result;
   }
 
   render() {
-    console.log(this.props.content);
-
-    // this.translate(0);
-    // this.translate(1);
-    // this.translate('2');
-    // this.translate(3.5);
-    // this.translate('4A');
-    // this.translate('5a');
-
-    // if (!Array.isArray(this.props.content) || !this.props.content.length) {
-    //   return null;
-    // }
-
     const encoded = this.translate(this.props.content);
 
     return (

@@ -222,7 +222,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="app" tabIndex="0">
+      <div className="app">
         <Screen
           board={this.state.board}
           current={this.state.current}

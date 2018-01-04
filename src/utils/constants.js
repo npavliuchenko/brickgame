@@ -5,6 +5,8 @@ const CONTROLS_SENSIVITY = 5;
 
 const ROTATION_DIRECTION = 1; // ClockWise
 
+const SCORE_DIGITS = 6;
+
 const FIGURES = [
   [ [0,1,0,0],  // I
     [0,1,0,0],
@@ -59,6 +61,7 @@ export {
   SPEED_TICK,
   CONTROLS_SENSIVITY,
   ROTATION_DIRECTION,
+  SCORE_DIGITS,
   FIGURES,
   KEYBOARD_KEYS,
   START_X_OFFSET,

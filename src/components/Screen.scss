@@ -5,6 +5,8 @@ $screen-facet-vert: 10px;
 $screen-facet-hor: 20px;
 $screen-info-width: $digit-size * 5;
 
+$info-right-offset: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+
 $digit-margin: 2px;
 $digit-border: 2px;
 $digit-padding: 2px;
@@ -13,12 +15,6 @@ $board-border: 2px;
 $board-width: $digit-size * 10;
 $board-height: $digit-size * 20;
 
-// $segment-size: $digit-size / 1.5;
-// $segment-weight: 3px;
-
-// $segment-size: 40px;
-// $segment-facet: 5px;
-// $segment-margin: 1px;
 $segment-size: $digit-size / 1.5;
 $segment-facet: 1px;
 $segment-margin: 1px;
@@ -33,6 +29,9 @@ $score-height: $segment-size * 2;
   padding: 10px;
   margin: 0 auto;
   position: relative;
+
+  font-family: $font-screen;
+  color: $color-active-digit;
 
   border-top: $screen-facet-vert solid darken($color-body-shadow, 2%);
   border-left: $screen-facet-hor solid $color-body-shadow;
@@ -105,8 +104,8 @@ $score-height: $segment-size * 2;
   &.next {
     position: absolute;
 
-    top: $digit-size * 2 + $board-border + $screen-padding;
-    right: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+    top: $digit-size * 3 + $board-border + $screen-padding;
+    right: $info-right-offset;
   }
 }
 
@@ -271,9 +270,40 @@ $score-height: $segment-size * 2;
     position: absolute;
 
     top: $board-border + $screen-padding;
-    right: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+    right: $info-right-offset;
 
     width: $score-width;
     height: $score-height;
+  }
+
+  &.speed,
+  &.level {
+    position: absolute;
+    right: $info-right-offset + $segment-size;
+
+    &::before {
+      position: absolute;
+      left: -4 * $digit-size + 2.5 * $segment-size;
+
+      font-size: 12px;
+      line-height: $segment-size * 2;
+      text-transform: uppercase;
+    }
+  }
+
+  &.speed {
+    top: $digit-size * 9 + $board-border + $screen-padding;
+
+    &::before {
+      content: 'speed';
+    }
+  }
+
+  &.level {
+    top: $digit-size * 11 + $board-border + $screen-padding;
+
+    &::before {
+      content: 'level';
+    }
   }
 }
