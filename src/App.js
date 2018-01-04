@@ -180,8 +180,7 @@ class App extends React.Component {
     }
   }
 
-  handleLongPress = (e) => { // fix App as context
-    // e.persist(); // to freeze the React event
+  handleLongPress(e) { // fix App as context
     const actionName = e.target.className;
 
     DEBUG && console.log(actionName + ' button', e.type === 'mousedown' ? 'on' : 'off');
@@ -197,9 +196,17 @@ class App extends React.Component {
     }
   }
 
-  handleShortPress = (e) => { // fix App as context
+  handleShortPress(e) { // fix App as context
     DEBUG && console.log(e.target.className + ' button');
     this.runAction(e.target.className);
+  }
+
+  handleButtonPress = (e) => { // fix App as context
+    if (e.type === 'click') {
+      this.handleShortPress(e);
+    } else {
+      this.handleLongPress(e);
+    }
   }
 
   handleKeyboard = (e) => { // fix App as context
@@ -218,28 +225,17 @@ class App extends React.Component {
 
         <div className="controls">
           <div className="game-controls">
-            <Button type="start" onClick={this.handleShortPress} />
+            <Button type="start" onShortPress={this.handleButtonPress} />
           </div>
 
           <div className="move-controls">
-            <Button type="left"
-              onMouseDown={this.handleLongPress}
-              onMouseUp={this.handleLongPress}
-            />
-            <Button type="down"
-              onMouseDown={this.handleLongPress}
-              onMouseUp={this.handleLongPress}
-            />
-            <Button type="right"
-              onMouseDown={this.handleLongPress}
-              onMouseUp={this.handleLongPress}
-            />
+            <Button type="left" onLongPress={this.handleButtonPress} />
+            <Button type="down" onLongPress={this.handleButtonPress} />
+            <Button type="right" onLongPress={this.handleButtonPress} />
           </div>
 
           <div className="action-controls">
-            <Button type="rotate"
-              onMouseDown={this.handleLongPress}
-              onMouseUp={this.handleLongPress} />
+            <Button type="rotate" onLongPress={this.handleButtonPress} />
           </div>
         </div>
       </div>
