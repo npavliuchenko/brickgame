@@ -3,7 +3,7 @@ import React from 'react';
 import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY,
   ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET,
   KEYBOARD_KEYS, SCORE_BONUS} from './utils/constants';
-import {random, createMatrix, rotateMatrix, mergeMatrix,
+import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
   hasOverflow, clearLines} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
@@ -11,12 +11,19 @@ import Button from './components/Button';
 import './App.scss';
 
 const DEBUG = true;
-const DEBUG_TICKS_LIMIT = 100;
+const DEBUG_TICKS_LIMIT = 1000;
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.resetGame(true);
+    this.handlePause('stop');
+
+    DEBUG && console.log(this);
+  }
+
+  resetGame(firstRun) {
+    const initialState = {
       board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
       current: { // fake figure outside the board to start the 'tick' loop
         figure: [[1]],
@@ -26,11 +33,15 @@ class App extends React.Component {
       next: this._getRandomFigure(),
       score: 0
     };
+
+    if (firstRun) //@TODO: refactor this crappy initialisation
+      this.state = initialState
+    else
+      this.setState(initialState);
+
     this.keys = {};
-
-    this.handlePause('stop');
-
-    DEBUG && console.log(this);
+    this.didNothingOnPreviousTick = false;
+    this.isBusy = false;
   }
 
   _getRandomFigure() {
@@ -80,17 +91,13 @@ class App extends React.Component {
 
     // if current figure is already down:
     } else {
-      //@TODO: check for game over
+      // check for game over
+      if (this.didNothingOnPreviousTick) {
+        this.gameOver();
+        return;
+      }
 
       this.setState((prevState, props) => {
-
-        // const board = mergeMatrix(
-        //   prevState.board,
-        //   prevState.current.figure,
-        //   prevState.current.y,
-        //   prevState.current.x
-        // );
-
         // remove the full lines
         const [linesCleared, board] = clearLines(
           // move figure to board layer
@@ -121,16 +128,57 @@ class App extends React.Component {
     }
 
     DEBUG && console.log('fall ' + this.limit, canMove);
+
+    this.didNothingOnPreviousTick = !canMove;
+  }
+
+  gameOver() {
+    // recursive timeout for board animation
+    const clearBoard = (iteration) => {
+      this.setState((prevState, props) => {
+        // console.log(iteration, prevState.board)
+        const newBoard = copyMatrix(prevState.board);
+        newBoard[iteration] = Array(prevState.board[iteration].length).fill(0);
+        return { board: newBoard };
+      });
+
+      if (iteration > 0) {
+        setTimeout(() => { clearBoard(iteration - 1) }, 100);
+      } else {
+        this.isBusy = false;
+        //@TODO: reset game
+        this.resetGame();
+      }
+    }
+
+    DEBUG && console.log('game over', 'score: ' + this.state.score);
+
+    // block any actions
+    this.isBusy = true;
+    // stop game
+    this.handlePause('stop');
+    // reset figures
+    this.setState({
+      next: createMatrix(FIGURES[0].length, FIGURES[0][0].length),
+      current: {
+        figure: [[0]],
+        x: 0,
+        y: 0
+      }
+    });
+
+    // run animation
+    clearBoard(this.state.board.length - 1);
   }
 
   handlePause(command) {
-    if (command === 'stop' || (this.timer && command !== 'play')) {
-      clearInterval(this.timer);
-      this.timer = null;
+    if (command === 'stop' || (this.running && command !== 'play')) {
+      clearInterval(this.running);
+      this.running = null;
     } else {
       //@TODO: use recursive setTimeout to change speeds
       //       test the time difference (delays for tick run)
-      this.timer = setInterval(this.tick.bind(this), SPEED_TICK);
+      this.running = setInterval(this.tick.bind(this), SPEED_TICK);
       this.limit = DEBUG_TICKS_LIMIT;
     }
   }
@@ -191,8 +239,13 @@ class App extends React.Component {
       rotate: () => { this.handleRotate() }
     }
 
+    if (this.isBusy) {
+      DEBUG && console.log('APP IS BUSY. Any actions are blocked');
+      return;
+    }
+
     if (actionHandlers.hasOwnProperty(actionName)) {
-      if (actionName === 'start' || DEBUG || this.timer) { // block actions on pause
+      if (actionName === 'start' || DEBUG || this.running) { // block actions on pause
         actionHandlers[actionName]();
       }
     }
