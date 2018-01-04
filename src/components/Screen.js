@@ -23,12 +23,13 @@ class Screen extends React.Component {
       <div className="screen">
         <SvgOrnament className="decor-left" />
         <SvgOrnament className="decor-right" />
-        <Board board={boardState} />
+        <Board content={boardState} className="board" />
+        <Board content={this.props.next} className="next" />
         <div className="score"></div>
-        <div className="next"></div>
         <div className="speed"></div>
         <div className="level"></div>
         <div className="rotate"></div>
+        <div className="state"></div>
       </div>
     );
   }

@@ -1,23 +1,30 @@
 @import '../style.scss';
 
-$border-vert: 10px;
-$border-hor: 20px;
+$screen-padding: 10px;
+$screen-facet-vert: 10px;
+$screen-facet-hor: 20px;
+$screen-info-width: $digit-size * 5;
 
 $digit-margin: 2px;
 $digit-border: 2px;
 $digit-padding: 2px;
 
+$board-border: 2px;
+$board-width: $digit-size * 10;
+$board-height: $digit-size * 20;
+
+
 .screen {
   background: $color-screen;
-  width: $digit-size * 15;
+  width: $board-width + $screen-info-width + $board-border * 2;
   padding: 10px;
   margin: 0 auto;
   position: relative;
 
-  border-top: $border-vert solid darken($color-body-shadow, 2%);
-  border-left: $border-hor solid $color-body-shadow;
-  border-bottom: $border-vert solid lighten($color-body-light, 2%);
-  border-right: $border-hor solid $color-body-light;
+  border-top: $screen-facet-vert solid darken($color-body-shadow, 2%);
+  border-left: $screen-facet-hor solid $color-body-shadow;
+  border-bottom: $screen-facet-vert solid lighten($color-body-light, 2%);
+  border-right: $screen-facet-hor solid $color-body-light;
 
   box-shadow: inset 1px 1px 0 darken($color-body, 4%),
     inset -1px -1px 0 $color-body,
@@ -26,11 +33,11 @@ $digit-padding: 2px;
   .decor-left,
   .decor-right {
     position: absolute;
-    top: -$border-vert;
+    top: -$screen-facet-vert;
     color: $color-label;
-    height: calc(100% + #{$border-vert * 2});
+    height: calc(100% + #{$screen-facet-vert * 2});
     width: auto;
-    margin: 0 ($border-hor * 2);
+    margin: 0 ($screen-facet-hor * 2);
   }
 
   .decor-left {
@@ -43,12 +50,7 @@ $digit-padding: 2px;
   }
 }
 
-.board {
-  border: 2px solid $color-active-digit;
-
-  width: $digit-size * 10;
-  height: $digit-size * 20;
-
+.matrix {
   > div {
     clear: both;
   }
@@ -78,5 +80,19 @@ $digit-padding: 2px;
         background: $color-active-digit;
       }
     }
+  }
+
+  &.board {
+    border: $board-border solid $color-active-digit;
+
+    width: $board-width;
+    height: $board-height;
+  }
+
+  &.next {
+    position: absolute;
+
+    top: $digit-size * 2 + $board-border + $screen-padding;
+    right: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
   }
 }

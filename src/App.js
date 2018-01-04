@@ -223,7 +223,11 @@ class App extends React.Component {
   render() {
     return (
       <div className="app" tabIndex="0">
-        <Screen board={this.state.board} current={this.state.current} />
+        <Screen
+          board={this.state.board}
+          current={this.state.current}
+          next={this.state.next}
+        />
 
         <div className="controls">
           <div className="game-controls">
