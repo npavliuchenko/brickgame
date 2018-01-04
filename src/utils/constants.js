@@ -42,6 +42,14 @@ const FIGURES = [
     [0,0,0,0] ],
 ];
 
+const KEYBOARD_KEYS = {
+  Space: 'start',
+  KeyA: 'left',
+  KeyS: 'down',
+  KeyD: 'right',
+  KeyW: 'rotate'
+}
+
 const START_X_OFFSET = Math.floor((BOARD_WIDTH - FIGURES[0][0].length) / 2);
 const START_Y_OFFSET = -2;
 
@@ -52,6 +60,7 @@ export {
   CONTROLS_SENSIVITY,
   ROTATION_DIRECTION,
   FIGURES,
+  KEYBOARD_KEYS,
   START_X_OFFSET,
   START_Y_OFFSET
 };

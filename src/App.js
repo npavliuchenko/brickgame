@@ -1,7 +1,10 @@
 import React from 'react';
 
-import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY, ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET} from './utils/constants';
-import {random, createMatrix, rotateMatrix, mergeMatrix, hasOverflow} from './utils/math';
+import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY,
+  ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET,
+  KEYBOARD_KEYS} from './utils/constants';
+import {random, createMatrix, rotateMatrix, mergeMatrix,
+  hasOverflow} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
 
@@ -20,7 +23,7 @@ class App extends React.Component {
         x: START_X_OFFSET,
         y: BOARD_HEIGHT
       },
-      next: this.getRandomFigure()
+      next: this._getRandomFigure()
     };
     this.keys = {};
 
@@ -29,11 +32,27 @@ class App extends React.Component {
     DEBUG && console.log(this);
   }
 
-  getRandomFigure() {
+  _getRandomFigure() {
     return rotateMatrix(FIGURES[random(FIGURES.length)], random(4));
   }
 
-  tick() { // update game state
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyboard);
+    // document.addEventListener('keyup', this.handleKeyboard);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyboard);
+    // document.removeEventListener('keyup', this.handleKeyboard);
+  }
+
+  //@TODO: remove after debugging
+  componentWillUpdate() {
+    // console.log('up');
+  }
+
+  // update game state
+  tick() {
     //@TODO: remove after debugging
     if (DEBUG && --this.limit <= 0) {
       this.handlePause('stop');
@@ -80,7 +99,7 @@ class App extends React.Component {
             x: START_X_OFFSET,
             y: START_Y_OFFSET
           },
-          next: this.getRandomFigure()
+          next: this._getRandomFigure()
         };
       });
     }
@@ -122,11 +141,6 @@ class App extends React.Component {
     });
   }
 
-  //@TODO: remove after debugging
-  componentWillUpdate() {
-    // console.log('up');
-  }
-
   handleRotate() {
     //@TODO: non-intuitive rotation, especially near the vertical walls
     this.setState((prevState, props) => {
@@ -152,26 +166,47 @@ class App extends React.Component {
     });
   }
 
-  handleLongPress(keyName, isActive, action) {
-    DEBUG && console.log(keyName + ' button', isActive ? 'on' : 'off');
+  handleLongPress(e) {
+    e.persist(); // to freeze the React event
 
-    if (isActive) {
-      action();
-      this.keys[keyName] = setInterval(() => {
-        action();
+    DEBUG && console.log(e.target.className + ' button', e.type === 'mousedown' ? 'on' : 'off');
+
+    if (e.type === 'mousedown') {
+      this.runAction(e.target.className);
+
+      this.keys[e.target.className] = setInterval(() => {
+        this.runAction(e.target.className);
       }, SPEED_TICK / CONTROLS_SENSIVITY);
     } else {
-      clearInterval(this.keys[keyName]);
+      clearInterval(this.keys[e.target.className]);
     }
   }
 
-  handleKeyboard(e) {
-    console.log(e, e.key);
+  handleKeyboard = (e) => { // fix App as context
+    DEBUG && console.log(e.code, e.type, e);
+
+    if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
+      this.runAction(KEYBOARD_KEYS[e.code]);
+    }
+  }
+
+  runAction(actionName) {
+    const actionHandlers = {
+      start:  () => { this.handlePause() },
+      left:   () => { this.handleMove(-1) },
+      down:   () => { this.tick() },
+      right:  () => { this.handleMove(1) },
+      rotate: () => { this.handleRotate() }
+    }
+
+    if (actionHandlers.hasOwnProperty(actionName)) {
+      actionHandlers[actionName]();
+    }
   }
 
   render() {
     return (
-      <div className="app">
+      <div className="app" tabIndex="0">
         <Screen board={this.state.board} current={this.state.current} />
 
         <div className="controls">
@@ -181,16 +216,16 @@ class App extends React.Component {
 
           <div className="move-controls">
             <Button type="left"
-              onMouseDown={() => this.handleLongPress('left', true, () => {this.handleMove(-1)}) }
-              onMouseUp={() => this.handleLongPress('left', false, () => {this.handleMove(-1)}) }
+              onMouseDown={(e) => this.handleLongPress(e) }
+              onMouseUp={(e) => this.handleLongPress(e) }
             />
             <Button type="down"
-              onMouseDown={() => this.handleLongPress('down', true, () => {this.tick()}) }
-              onMouseUp={() => this.handleLongPress('down', false, () => {this.tick()}) }
+              onMouseDown={(e) => this.handleLongPress(e) }
+              onMouseUp={(e) => this.handleLongPress(e) }
             />
             <Button type="right"
-              onMouseDown={() => this.handleLongPress('right', true, () => {this.handleMove(1)}) }
-              onMouseUp={() => this.handleLongPress('right', false, () => {this.handleMove(1)}) }
+              onMouseDown={(e) => this.handleLongPress(e) }
+              onMouseUp={(e) => this.handleLongPress(e) }
             />
           </div>
 
