@@ -176,11 +176,13 @@ class App extends React.Component {
     }
 
     if (actionHandlers.hasOwnProperty(actionName)) {
-      actionHandlers[actionName]();
+      if (actionName === 'start' || DEBUG || this.timer) { // block actions on pause
+        actionHandlers[actionName]();
+      }
     }
   }
 
-  handleLongPress(e) { // fix App as context
+  handleLongPress(e) {
     const actionName = e.target.className;
 
     DEBUG && console.log(actionName + ' button', e.type === 'mousedown' ? 'on' : 'off');
@@ -196,7 +198,7 @@ class App extends React.Component {
     }
   }
 
-  handleShortPress(e) { // fix App as context
+  handleShortPress(e) {
     DEBUG && console.log(e.target.className + ' button');
     this.runAction(e.target.className);
   }
