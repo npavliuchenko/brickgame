@@ -3,6 +3,7 @@ import React from 'react';
 import {mergeMatrix} from '../utils/math';
 import SvgOrnament from '../svg/Ornament';
 import Board from './Board';
+import NumberBoard from './NumberBoard';
 // import {ReactComponent as Ornament} from '../img/ornament.svg';
 // import svgOrnament from '../img/ornament.raw.svg';
 
@@ -25,9 +26,10 @@ class Screen extends React.Component {
         <SvgOrnament className="decor-right" />
         <Board content={boardState} className="board" />
         <Board content={this.props.next} className="next" />
-        <div className="score"></div>
-        <div className="speed"></div>
-        <div className="level"></div>
+        <NumberBoard content={'     0'} className="score" />
+        {/*<NumberBoard content={'0123456789'} className="test" />
+        <NumberBoard content={1} className="speed" />
+        <NumberBoard content="" className="level" />*/}
         <div className="rotate"></div>
         <div className="state"></div>
       </div>

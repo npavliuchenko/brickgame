@@ -13,6 +13,19 @@ $board-border: 2px;
 $board-width: $digit-size * 10;
 $board-height: $digit-size * 20;
 
+// $segment-size: $digit-size / 1.5;
+// $segment-weight: 3px;
+
+// $segment-size: 40px;
+// $segment-facet: 5px;
+// $segment-margin: 1px;
+$segment-size: $digit-size / 1.5;
+$segment-facet: 1px;
+$segment-margin: 1px;
+
+$score-width: $segment-size * 6;
+$score-height: $segment-size * 2;
+
 
 .screen {
   background: $color-screen;
@@ -94,5 +107,173 @@ $board-height: $digit-size * 20;
 
     top: $digit-size * 2 + $board-border + $screen-padding;
     right: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+  }
+}
+
+.number {
+  .digit {
+    float: left;
+    width: $segment-size;
+    height: $segment-size * 2;
+    position: relative;
+  }
+
+  .segment0,
+  .segment1,
+  .segment2,
+  .segment3,
+  .segment4,
+  .segment5,
+  .segment6 {
+    position: absolute;
+    background: $color-passive-digit;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    &.active {
+      background: $color-active-digit;
+    }
+  }
+
+  $segment-real-inner-width: $segment-facet * 2;
+  $segment-real-length-margin: $segment-facet + $segment-margin;
+  $segment-real-width-margin: -$segment-facet;
+
+  %vertical-segment {
+    margin: $segment-real-length-margin $segment-real-width-margin;
+    width: $segment-real-inner-width;
+    height: $segment-size - ($segment-facet * 3 + $segment-margin * 3);
+
+    &::before,
+    &::after {
+      left: 0;
+      border-color: $color-passive-digit transparent;
+    }
+
+    &::before {
+      top: -$segment-facet;
+      border-width: 0 $segment-facet $segment-facet;
+    }
+
+    &::after {
+      bottom: -$segment-facet;
+      border-width: $segment-facet $segment-facet 0 $segment-facet;
+    }
+
+    &.active {
+      &::before,
+      &::after {
+        border-color: $color-active-digit transparent;
+      }
+    }
+  }
+
+  %horizontal-segment {
+    margin: $segment-real-width-margin $segment-real-length-margin;
+    width: $segment-size - ($segment-facet + $segment-margin) * 4;
+    height: $segment-real-inner-width;
+
+    &::before,
+    &::after {
+      top: 0;
+      border-color: transparent $color-passive-digit;
+    }
+
+    &::before {
+      left: -$segment-facet;
+      border-width: $segment-facet $segment-facet $segment-facet 0;
+    }
+
+    &::after {
+      right: -$segment-facet;
+      border-width: $segment-facet 0 $segment-facet $segment-facet;
+    }
+
+    &.active {
+      &::before,
+      &::after {
+        border-color: transparent $color-active-digit;
+      }
+    }
+  }
+
+  %top-segment {
+    // top: 0 + $segment-margin + $segment-facet + 1;
+    top: $segment-margin + $segment-facet;
+  }
+
+  %middle-segment {
+    top: $segment-size;
+  }
+
+  %bottom-segment {
+    bottom: $segment-margin + $segment-facet;
+  }
+
+  %left-segment {
+    left: $segment-margin + $segment-facet;
+  }
+
+  %right-segment {
+    right: $segment-margin + $segment-facet;
+  }
+
+  .segment0 {
+    @extend %horizontal-segment;
+    @extend %top-segment;
+    @extend %left-segment;
+  }
+
+  .segment1 {
+    @extend %vertical-segment;
+    @extend %top-segment;
+    @extend %left-segment;
+  }
+
+  .segment2 {
+    @extend %vertical-segment;
+    @extend %top-segment;
+    @extend %right-segment;
+  }
+
+  .segment3 {
+    @extend %horizontal-segment;
+    @extend %middle-segment;
+    @extend %left-segment;
+  }
+
+  .segment4 {
+    @extend %vertical-segment;
+    @extend %bottom-segment;
+    @extend %left-segment;
+  }
+
+  .segment5 {
+    @extend %vertical-segment;
+    @extend %bottom-segment;
+    @extend %right-segment;
+  }
+
+  .segment6 {
+    @extend %horizontal-segment;
+    @extend %bottom-segment;
+    @extend %left-segment;
+  }
+
+  &.score {
+    position: absolute;
+
+    top: $board-border + $screen-padding;
+    right: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+
+    width: $score-width;
+    height: $score-height;
   }
 }

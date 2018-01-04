@@ -5,7 +5,6 @@ import React from 'react';
 
 class Board extends React.Component {
   render() {
-    console.log(this.props.content);
 
     if (!Array.isArray(this.props.content) || !this.props.content.length) {
       return null;
