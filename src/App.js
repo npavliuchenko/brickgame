@@ -2,7 +2,7 @@ import React from 'react';
 
 import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY,
   ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET,
-  KEYBOARD_KEYS, SCORE_BONUS} from './utils/constants';
+  KEYBOARD_KEYS, SCORE_BONUS, SWITCH_SPEED_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
   hasOverflow, clearLines} from './utils/math';
 import Screen from './components/Screen';
@@ -42,6 +42,7 @@ class App extends React.Component {
     this.keys = {};
     this.didNothingOnPreviousTick = false;
     this.isBusy = false;
+    this.ticks = [];
   }
 
   _getRandomFigure() {
@@ -65,6 +66,8 @@ class App extends React.Component {
 
   // update game state
   tick() {
+    const t0 = performance.now();
+
     //@TODO: remove after debugging
     if (DEBUG && --this.limit <= 0) {
       this.handlePause('stop');
@@ -130,6 +133,10 @@ class App extends React.Component {
     DEBUG && console.log('fall ' + this.limit, canMove);
 
     this.didNothingOnPreviousTick = !canMove;
+
+    const t1 = performance.now();
+    this.ticks.push(t1 - t0);
+    DEBUG && console.log('tick was ' + (t1 - t0) + ' ms');
   }
 
   gameOver() {
@@ -171,10 +178,30 @@ class App extends React.Component {
     clearBoard(this.state.board.length - 1);
   }
 
+  printTimingStats(intervalsArray) {
+    let min = Number.MAX_VALUE;
+    let max = 0;
+    let sum = 0.0;
+
+    for (let i = 0; i < intervalsArray.length; i++) {
+      if (intervalsArray[i] < min) min = intervalsArray[i];
+      if (intervalsArray[i] > max) max = intervalsArray[i];
+      sum += intervalsArray[i];
+    }
+
+    console.log(
+      'MIN : ' + min.toFixed(2) + 'ms',
+      'MAX : ' + max.toFixed(2) + 'ms',
+      'AVG : ' + (sum / intervalsArray.length).toFixed(2) + 'ms'
+    );
+  }
+
   handlePause(command) {
     if (command === 'stop' || (this.running && command !== 'play')) {
       clearInterval(this.running);
       this.running = null;
+
+      DEBUG && this.printTimingStats(this.ticks);
     } else {
       //@TODO: use recursive setTimeout to change speeds
       //       test the time difference (delays for tick run)
@@ -281,7 +308,7 @@ class App extends React.Component {
   }
 
   handleKeyboard = (e) => { // fix App as context
-    DEBUG && console.log(e.code, e.type, e);
+    // DEBUG && console.log(e.code, e.type, e);
 
     if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
       e.preventDefault();
