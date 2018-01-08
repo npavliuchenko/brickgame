@@ -2,7 +2,7 @@ import React from 'react';
 
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
-  CONTROLS_SENSIVITY, ROTATION_DIRECTION, FIGURES,
+  CONTROLS_SENSIVITY, ROTATION_DEFAULT, FIGURES,
   START_X_OFFSET, START_Y_OFFSET,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
@@ -43,7 +43,8 @@ class App extends React.Component {
       next: [[0]],
       score: 'hello',
       speed: 1,
-      level: 1
+      level: 1,
+      rotation: ROTATION_DEFAULT
     }
 
     DEBUG && console.log(this);
@@ -280,7 +281,7 @@ class App extends React.Component {
   handleRotate() {
     //@TODO: non-intuitive rotation, especially near the vertical walls
     this.setState((prevState, props) => {
-      const rotatedFigure = rotateMatrix(prevState.current.figure, ROTATION_DIRECTION);
+      const rotatedFigure = rotateMatrix(prevState.current.figure, prevState.rotation);
 
       // check if rotation is possible
       const canMove = !hasOverflow(
@@ -302,6 +303,16 @@ class App extends React.Component {
     });
   }
 
+  switchRotation() {
+    this.setState((prevState, props) => {
+      DEBUG && console.log('rotation direction changed');
+
+      return {
+        rotation: prevState.rotation > 0 ? -1 : 1
+      };
+    });
+  }
+
   runAction(actionName) {
     let actionHandlers = {};
 
@@ -317,6 +328,7 @@ class App extends React.Component {
     };
     actionHandlers[STATE_PAUSE] = {
       start:  () => { this.handleStart() },
+      rotate: () => { this.switchRotation() }
     };
 
     DEBUG && console.log(this.state.state, actionName);
@@ -384,6 +396,7 @@ class App extends React.Component {
           score={this.state.score}
           speed={this.state.speed}
           level={this.state.level}
+          rotation={this.state.rotation > 0 ? 'cw' : 'ccw'}
         />
 
         <div className="controls">

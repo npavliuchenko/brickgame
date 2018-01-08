@@ -307,3 +307,78 @@ $score-height: $segment-size * 2;
     }
   }
 }
+
+.rotate-direction {
+  position: absolute;
+  right: $info-right-offset + $digit-size;
+  top: $digit-size * 14 + $board-border + $screen-padding;
+
+  .arrow {
+    $arrow-radius: $digit-size;
+    $arrow-weight: 2px;
+    $arrow-wing: 4px;
+    $arrow-wing-compensation: 0.25 * $arrow-weight;
+    $sqrt2: 1.4142;
+
+    position: relative;
+    width: $sqrt2 * ($arrow-radius + $arrow-weight);
+    height: $arrow-radius - $arrow-radius / $sqrt2 + $arrow-weight;
+    overflow: hidden;
+    margin-bottom: $digit-size / 2;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: ($arrow-radius + $arrow-weight) / $sqrt2 - $arrow-radius - $arrow-weight - $arrow-wing-compensation;
+      width: $arrow-radius * 2;
+      height: $arrow-radius * 2;
+      border: $arrow-weight $color-passive-digit solid;
+      border-radius: 1000px;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+
+      width: $arrow-wing;
+      height: $arrow-wing;
+      border-style: solid;
+      border-width: $arrow-weight;
+    }
+
+    &.active::before {
+      border-color: $color-active-digit;
+    }
+  }
+
+  .ccw {
+    &::before {
+      top: 0;
+    }
+
+    &::after {
+      bottom: 0;
+      border-color: transparent transparent $color-passive-digit $color-passive-digit;
+    }
+
+    &.active::after {
+      border-color: transparent transparent $color-active-digit $color-active-digit;
+    }
+  }
+
+  .cw {
+    &::before {
+      bottom: 0;
+    }
+
+    &::after {
+      top: 0;
+      border-color: $color-passive-digit transparent transparent $color-passive-digit;
+    }
+
+    &.active::after {
+      border-color: $color-active-digit transparent transparent $color-active-digit;
+    }
+  }
+}
