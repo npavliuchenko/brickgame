@@ -51,7 +51,11 @@ const KEYBOARD_KEYS = {
   KeyA: 'left',
   KeyS: 'down',
   KeyD: 'right',
-  KeyW: 'rotate'
+  KeyW: 'rotate',
+  ArrowLeft: 'left',
+  ArrowDown: 'down',
+  ArrowRight: 'right',
+  ArrowUp: 'rotate'
 };
 
 const SCORE_BONUS = {
