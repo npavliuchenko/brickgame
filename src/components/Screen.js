@@ -21,7 +21,7 @@ class Screen extends React.Component {
         <Board content={this.props.next} className="next" />
         <ScoreBoard content={this.props.score} />
         <NumberBoard content={this.props.speed} className="speed" />
-        <NumberBoard content={1} className="level" />
+        <NumberBoard content={this.props.level} className="level" />
         {/*<div className="rotate"></div>
         <div className="state"></div>*/}
       </div>

@@ -1,3 +1,8 @@
+const STATE_OFF = 0;
+const STATE_BUSY = -1;
+const STATE_PLAY = 1;
+const STATE_PAUSE = 2
+
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 const SPEED_DELAY_BASIC = 500;
@@ -70,6 +75,10 @@ const START_X_OFFSET = Math.floor((BOARD_WIDTH - FIGURES[0][0].length) / 2);
 const START_Y_OFFSET = -2;
 
 export {
+  STATE_OFF,
+  STATE_BUSY,
+  STATE_PLAY,
+  STATE_PAUSE,
   BOARD_WIDTH,
   BOARD_HEIGHT,
   SPEED_DELAY_BASIC,

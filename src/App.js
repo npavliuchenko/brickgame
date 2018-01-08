@@ -1,6 +1,7 @@
 import React from 'react';
 
-import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
+import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
+  BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
   CONTROLS_SENSIVITY, ROTATION_DIRECTION, FIGURES,
   START_X_OFFSET, START_Y_OFFSET,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
@@ -35,14 +36,26 @@ function printTimingStats(intervalsArray) {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.resetGame(true);
-    this.handlePause('stop');
+    this.state = {
+      state: STATE_OFF,
+      board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
+      current: null,
+      next: [[0]],
+      score: 'hello',
+      speed: 1,
+      level: 1
+    }
 
     DEBUG && console.log(this);
   }
 
-  resetGame(firstRun) {
-    const initialState = {
+  initGame() {
+    this.keys = {};
+    this.didNothingOnPreviousTick = false;
+    this.isBusy = false;
+    this.ticks = [];
+
+    this.setState({
       board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
       current: { // fake figure outside the board to start the 'tick' loop
         figure: [[1]],
@@ -50,19 +63,36 @@ class App extends React.Component {
         y: BOARD_HEIGHT
       },
       next: this._getRandomFigure(),
-      score: 0,
-      speed: 1
-    };
+      score: 0
+    });
+  }
 
-    if (firstRun) //@TODO: refactor this crappy initialisation
-      this.state = initialState
-    else
-      this.setState(initialState);
+  startGame() {
+    //@TODO: may be use recursive setTimeout to change speeds ???
+    //       but setTimeout excludes code run from timer (so less smooth)
+    //       test the time difference (delays for tick run) :
+    //       ~9-130ms per tick (avg=12ms)
 
-    this.keys = {};
-    this.didNothingOnPreviousTick = false;
-    this.isBusy = false;
-    this.ticks = [];
+    this.setState({
+      state: STATE_PLAY
+    });
+
+    this.gameTimer = setInterval(
+      this.tick.bind(this),
+      this._getDelayFromSpeed(this.state.speed)
+    );
+    this.limit = DEBUG_TICKS_LIMIT;
+    this.tick(); // run 1st tick manually to provide better feeling for user
+  }
+
+  pauseGame() {
+    clearInterval(this.gameTimer);
+
+    this.setState({
+      state: STATE_PAUSE
+    });
+
+    DEBUG && printTimingStats(this.ticks);
   }
 
   _getRandomFigure() {
@@ -93,11 +123,12 @@ class App extends React.Component {
     const t0 = performance.now();
 
     //@TODO: cancel if game over (on high speeds)
+    // if (this.state.state !== STATE_PLAY) return;
 
     //@TODO: remove after debugging
-    // if (DEBUG && --this.limit <= 0) {
-    //   this.handlePause('stop');
-    // }
+    if (DEBUG && --this.limit <= 0) {
+      this.handleStart('stop');
+    }
 
     this.setState((prevState, props) => {
       let newState;
@@ -146,8 +177,8 @@ class App extends React.Component {
         DEBUG && linesCleared && console.log(newScore + ' points', 'new speed is ' + newSpeed);
 
         if (newScore % SPEED_SWITCH_SCORE === 0) {
-          clearInterval(this.running);
-          this.running = setInterval(this.tick.bind(this), this._getDelayFromSpeed(newSpeed));
+          clearInterval(this.gameTimer);
+          this.gameTimer = setInterval(this.tick.bind(this), this._getDelayFromSpeed(newSpeed));
         }
 
         // update next & current figures, score
@@ -186,43 +217,41 @@ class App extends React.Component {
       if (iteration > 0) {
         setTimeout(() => { clearBoard(iteration - 1) }, 100);
       } else {
-        this.isBusy = false;
-        //@TODO: reset game
-        this.resetGame();
+        this.setState({
+          state: STATE_OFF
+        });
       }
     }
 
     DEBUG && console.log('game over', 'score: ' + this.state.score);
 
-    // block any actions
-    this.isBusy = true;
     // stop game
-    this.handlePause('stop');
+    this.handleStart('pause');
     // reset figures
     this.setState({
+      state: STATE_BUSY,
       next: createMatrix(FIGURES[0].length, FIGURES[0][0].length),
-      current: {
-        figure: [[0]],
-        x: 0,
-        y: 0
-      }
+      current: null
     });
 
     // run animation
     clearBoard(this.state.board.length - 1);
   }
 
-  handlePause(command) {
-    if (command === 'stop' || (this.running && command !== 'play')) {
-      clearInterval(this.running);
-      this.running = null;
+  handleStart(command) {
+    DEBUG && console.log(this.state.state, command);
 
-      DEBUG && printTimingStats(this.ticks);
+    if ((this.state.state === STATE_OFF && command === undefined)
+      || command === 'init')
+    {
+      this.initGame();
+      this.startGame();
+    } else if ((this.state.state === STATE_PAUSE && command === undefined)
+      || command === 'start')
+    {
+      this.startGame();
     } else {
-      //@TODO: use recursive setTimeout to change speeds
-      //       test the time difference (delays for tick run)
-      this.running = setInterval(this.tick.bind(this), this._getDelayFromSpeed(this.state.speed));
-      this.limit = DEBUG_TICKS_LIMIT;
+      this.pauseGame();
     }
   }
 
@@ -274,23 +303,28 @@ class App extends React.Component {
   }
 
   runAction(actionName) {
-    const actionHandlers = {
-      start:  () => { this.handlePause() },
+    let actionHandlers = {};
+
+    actionHandlers[STATE_PLAY] = {
+      start:  () => { this.handleStart() },
       left:   () => { this.handleMove(-1) },
       down:   () => { this.tick() },
       right:  () => { this.handleMove(1) },
       rotate: () => { this.handleRotate() }
-    }
+    };
+    actionHandlers[STATE_OFF] = {
+      start:  () => { this.handleStart() },
+    };
+    actionHandlers[STATE_PAUSE] = {
+      start:  () => { this.handleStart() },
+    };
 
-    if (this.isBusy) {
-      DEBUG && console.log('APP IS BUSY. Any actions are blocked');
-      return;
-    }
+    DEBUG && console.log(this.state.state, actionName);
 
-    if (actionHandlers.hasOwnProperty(actionName)) {
-      if (actionName === 'start' || DEBUG || this.running) { // block actions on pause
-        actionHandlers[actionName]();
-      }
+    if (actionHandlers.hasOwnProperty(this.state.state)
+      && actionHandlers[this.state.state].hasOwnProperty(actionName))
+    {
+      actionHandlers[this.state.state][actionName]();
     }
   }
 
@@ -349,6 +383,7 @@ class App extends React.Component {
           next={this.state.next}
           score={this.state.score}
           speed={this.state.speed}
+          level={this.state.level}
         />
 
         <div className="controls">
