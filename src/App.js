@@ -1,10 +1,11 @@
 import React from 'react';
 
-import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_TICK, CONTROLS_SENSIVITY,
-  ROTATION_DIRECTION, FIGURES, START_X_OFFSET, START_Y_OFFSET,
-  KEYBOARD_KEYS, SCORE_BONUS, SWITCH_SPEED_SCORE} from './utils/constants';
+import {BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
+  CONTROLS_SENSIVITY, ROTATION_DIRECTION, FIGURES,
+  START_X_OFFSET, START_Y_OFFSET,
+  KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
-  hasOverflow, clearLines} from './utils/math';
+  hasOverflow, clearLines, div} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
 
@@ -31,7 +32,8 @@ class App extends React.Component {
         y: BOARD_HEIGHT
       },
       next: this._getRandomFigure(),
-      score: 0
+      score: 0,
+      speed: 1
     };
 
     if (firstRun) //@TODO: refactor this crappy initialisation
@@ -64,17 +66,23 @@ class App extends React.Component {
     // console.log('up');
   }
 
+  getDelayFromSpeed(speed) {
+    return SPEED_DELAY_BASIC - (speed - 1) * SPEED_DELAY_CHANGE;
+  }
+
   // update game state
   tick() {
-    let newState;
     const t0 = performance.now();
 
+    //@TODO: cancel if game over (on high speeds)
+
     //@TODO: remove after debugging
-    if (DEBUG && --this.limit <= 0) {
-      this.handlePause('stop');
-    }
+    // if (DEBUG && --this.limit <= 0) {
+    //   this.handlePause('stop');
+    // }
 
     this.setState((prevState, props) => {
+      let newState;
       const canMove = !hasOverflow(
         prevState.board,
         prevState.current.figure,
@@ -113,7 +121,16 @@ class App extends React.Component {
           prevState.current.y + prevState.current.figure.length - 1
         );
 
-        DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared]);
+        const newScore = prevState.score + SCORE_BONUS[linesCleared];
+        const newSpeed = Math.min(9, div(newScore, SPEED_SWITCH_SCORE) + 1);
+
+        DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared] + ' points are gotten');
+        DEBUG && linesCleared && console.log(newScore + ' points', 'new speed is ' + newSpeed);
+
+        if (newScore % SPEED_SWITCH_SCORE === 0) {
+          clearInterval(this.running);
+          this.running = setInterval(this.tick.bind(this), this.getDelayFromSpeed(newSpeed));
+        }
 
         // update next & current figures, score
         newState = {
@@ -124,7 +141,8 @@ class App extends React.Component {
             y: START_Y_OFFSET
           },
           next: this._getRandomFigure(),
-          score: prevState.score + SCORE_BONUS[linesCleared]
+          score: newScore,
+          speed: newSpeed
         }
       }
 
@@ -203,7 +221,7 @@ class App extends React.Component {
     } else {
       //@TODO: use recursive setTimeout to change speeds
       //       test the time difference (delays for tick run)
-      this.running = setInterval(this.tick.bind(this), SPEED_TICK);
+      this.running = setInterval(this.tick.bind(this), this.getDelayFromSpeed(this.state.speed));
       this.limit = DEBUG_TICKS_LIMIT;
     }
   }
@@ -286,7 +304,7 @@ class App extends React.Component {
 
       this.keys[actionName] = setInterval(() => {
         this.runAction(actionName);
-      }, SPEED_TICK / CONTROLS_SENSIVITY);
+      }, this.getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
     } else {
       clearInterval(this.keys[actionName]);
     }
@@ -322,6 +340,7 @@ class App extends React.Component {
           current={this.state.current}
           next={this.state.next}
           score={this.state.score}
+          speed={this.state.speed}
         />
 
         <div className="controls">
