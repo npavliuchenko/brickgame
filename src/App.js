@@ -14,6 +14,24 @@ import './App.scss';
 const DEBUG = true;
 const DEBUG_TICKS_LIMIT = 1000;
 
+function printTimingStats(intervalsArray) {
+  let min = Number.MAX_VALUE;
+  let max = 0;
+  let sum = 0.0;
+
+  for (let i = 0; i < intervalsArray.length; i++) {
+    if (intervalsArray[i] < min) min = intervalsArray[i];
+    if (intervalsArray[i] > max) max = intervalsArray[i];
+    sum += intervalsArray[i];
+  }
+
+  console.log(
+    'MIN : ' + min.toFixed(2) + 'ms',
+    'MAX : ' + max.toFixed(2) + 'ms',
+    'AVG : ' + (sum / intervalsArray.length).toFixed(2) + 'ms'
+  );
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -51,6 +69,10 @@ class App extends React.Component {
     return rotateMatrix(FIGURES[random(FIGURES.length)], random(4));
   }
 
+  _getDelayFromSpeed(speed) {
+    return SPEED_DELAY_BASIC - (speed - 1) * SPEED_DELAY_CHANGE;
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyboard);
     // document.addEventListener('keyup', this.handleKeyboard);
@@ -64,10 +86,6 @@ class App extends React.Component {
   //@TODO: remove after debugging
   componentWillUpdate() {
     // console.log('up');
-  }
-
-  getDelayFromSpeed(speed) {
-    return SPEED_DELAY_BASIC - (speed - 1) * SPEED_DELAY_CHANGE;
   }
 
   // update game state
@@ -129,7 +147,7 @@ class App extends React.Component {
 
         if (newScore % SPEED_SWITCH_SCORE === 0) {
           clearInterval(this.running);
-          this.running = setInterval(this.tick.bind(this), this.getDelayFromSpeed(newSpeed));
+          this.running = setInterval(this.tick.bind(this), this._getDelayFromSpeed(newSpeed));
         }
 
         // update next & current figures, score
@@ -194,34 +212,16 @@ class App extends React.Component {
     clearBoard(this.state.board.length - 1);
   }
 
-  printTimingStats(intervalsArray) {
-    let min = Number.MAX_VALUE;
-    let max = 0;
-    let sum = 0.0;
-
-    for (let i = 0; i < intervalsArray.length; i++) {
-      if (intervalsArray[i] < min) min = intervalsArray[i];
-      if (intervalsArray[i] > max) max = intervalsArray[i];
-      sum += intervalsArray[i];
-    }
-
-    console.log(
-      'MIN : ' + min.toFixed(2) + 'ms',
-      'MAX : ' + max.toFixed(2) + 'ms',
-      'AVG : ' + (sum / intervalsArray.length).toFixed(2) + 'ms'
-    );
-  }
-
   handlePause(command) {
     if (command === 'stop' || (this.running && command !== 'play')) {
       clearInterval(this.running);
       this.running = null;
 
-      DEBUG && this.printTimingStats(this.ticks);
+      DEBUG && printTimingStats(this.ticks);
     } else {
       //@TODO: use recursive setTimeout to change speeds
       //       test the time difference (delays for tick run)
-      this.running = setInterval(this.tick.bind(this), this.getDelayFromSpeed(this.state.speed));
+      this.running = setInterval(this.tick.bind(this), this._getDelayFromSpeed(this.state.speed));
       this.limit = DEBUG_TICKS_LIMIT;
     }
   }
@@ -304,7 +304,7 @@ class App extends React.Component {
 
       this.keys[actionName] = setInterval(() => {
         this.runAction(actionName);
-      }, this.getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
+      }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
     } else {
       clearInterval(this.keys[actionName]);
     }
@@ -333,11 +333,19 @@ class App extends React.Component {
   }
 
   render() {
+    const boardState = this.state.current ?
+      mergeMatrix(
+        this.state.board,
+        this.state.current.figure,
+        this.state.current.y,
+        this.state.current.x
+      ) :
+      this.state.board;
+
     return (
       <div className="app">
         <Screen
-          board={this.state.board}
-          current={this.state.current}
+          board={boardState}
           next={this.state.next}
           score={this.state.score}
           speed={this.state.speed}
