@@ -66,6 +66,7 @@ class App extends React.Component {
 
   // update game state
   tick() {
+    let newState;
     const t0 = performance.now();
 
     //@TODO: remove after debugging
@@ -73,34 +74,32 @@ class App extends React.Component {
       this.handlePause('stop');
     }
 
-    //@TODO: may be problem with async state ? The same is for all outer checks
-    const canMove = !hasOverflow(
-      this.state.board,
-      this.state.current.figure,
-      this.state.current.y + 1,
-      this.state.current.x
-    );
+    this.setState((prevState, props) => {
+      const canMove = !hasOverflow(
+        prevState.board,
+        prevState.current.figure,
+        prevState.current.y + 1,
+        prevState.current.x
+      );
 
-    // if current figure is still falling:
-    if (canMove) {
-      // move it
-      this.setState((prevState, props) => ({
-        current: {
-          figure: prevState.current.figure,
-          x: prevState.current.x,
-          y: prevState.current.y + 1
+      // if current figure is still falling ...
+      if (canMove) {
+        newState = {
+          current: {
+            figure: prevState.current.figure,
+            x: prevState.current.x,
+            y: prevState.current.y + 1
+          }
         }
-      }));
 
-    // if current figure is already down:
-    } else {
-      // check for game over
-      if (this.didNothingOnPreviousTick) {
-        this.gameOver();
-        return;
-      }
+      // if current figure is already down ...
+      } else {
+        // check for game over
+        if (this.didNothingOnPreviousTick) {
+          this.gameOver();
+          return;
+        }
 
-      this.setState((prevState, props) => {
         // remove the full lines
         const [linesCleared, board] = clearLines(
           // move figure to board layer
@@ -117,7 +116,7 @@ class App extends React.Component {
         DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared]);
 
         // update next & current figures, score
-        return {
+        newState = {
           board: board,
           current: {
             figure: prevState.next,
@@ -126,13 +125,12 @@ class App extends React.Component {
           },
           next: this._getRandomFigure(),
           score: prevState.score + SCORE_BONUS[linesCleared]
-        };
-      });
-    }
+        }
+      }
 
-    DEBUG && console.log('fall ' + this.limit, canMove);
-
-    this.didNothingOnPreviousTick = !canMove;
+      this.didNothingOnPreviousTick = !canMove;
+      return newState;
+    });
 
     const t1 = performance.now();
     this.ticks.push(t1 - t0);
