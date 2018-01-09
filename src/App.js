@@ -2,7 +2,7 @@ import React from 'react';
 
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
-  CONTROLS_SENSIVITY, ROTATION_DEFAULT, FIGURES,
+  CONTROLS_SENSIVITY, CONTROLS_REPEAT_DELAY, ROTATION_DEFAULT, FIGURES,
   MAX_SPEED, MAX_LEVEL,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
@@ -370,27 +370,10 @@ class App extends React.Component {
 
       this.keys[actionName] = setInterval(() => {
         this.runAction(actionName);
-      }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
+      }, CONTROLS_REPEAT_DELAY); //this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
     } else {
       clearInterval(this.keys[actionName]);
       this.keys[actionName] = null;
-    }
-  }
-
-  handleLongPress(e, eventSource) {
-    const actionName = e.target.className;
-    e.preventDefault();
-
-    DEBUG && console.log(actionName + ' ' + eventSource, e.type === (eventSource + 'down') ? 'on' : 'off');
-
-    if (e.type === eventSource + 'mousedown') {
-      this.runAction(actionName);
-
-      this.keys[eventSource + actionName] = setInterval(() => {
-        this.runAction(actionName);
-      }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
-    } else {
-      clearInterval(this.keys[eventSource + actionName]);
     }
   }
 
