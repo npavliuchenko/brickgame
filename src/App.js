@@ -47,11 +47,12 @@ class App extends React.Component {
       rotation: ROTATION_DEFAULT
     }
 
+    this.keys = {};
+
     DEBUG && console.log(this);
   }
 
   initGame() {
-    this.keys = {};
     this.didNothingOnPreviousTick = false;
     this.isBusy = false;
     this.ticks = [];
@@ -325,6 +326,7 @@ class App extends React.Component {
     };
     actionHandlers[STATE_OFF] = {
       start:  () => { this.handleStart() },
+      rotate: () => { this.switchRotation() }
     };
     actionHandlers[STATE_PAUSE] = {
       start:  () => { this.handleStart() },
