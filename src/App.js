@@ -2,7 +2,7 @@ import React from 'react';
 
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
-  CONTROLS_SENSIVITY, ROTATION_DEFAULT, FIGURES,
+  CONTROLS_REPEAT_DELAY, ROTATION_DEFAULT, FIGURES,
   MAX_SPEED, MAX_LEVEL,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
@@ -108,12 +108,12 @@ class App extends React.Component {
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyboard);
-    // document.addEventListener('keyup', this.handleKeyboard);
+    document.addEventListener('keyup', this.handleKeyboard);
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyboard);
-    // document.removeEventListener('keyup', this.handleKeyboard);
+    document.removeEventListener('keyup', this.handleKeyboard);
   }
 
   //@TODO: remove after debugging
@@ -335,9 +335,9 @@ class App extends React.Component {
 
     actionHandlers[STATE_PLAY] = {
       start:  () => { this.handleStart() },
-      left:   () => { this.handleMove(-1) },
-      down:   () => { this.tick() },
-      right:  () => { this.handleMove(1) },
+      left:   () => { this.handleMove(-1); return true }, // return true for repeatable actions
+      down:   () => { this.tick(); return true },
+      right:  () => { this.handleMove(1); return true },
       rotate: () => { this.handleRotate() }
     };
     actionHandlers[STATE_OFF] = {
@@ -356,37 +356,34 @@ class App extends React.Component {
     if (actionHandlers.hasOwnProperty(this.state.state)
       && actionHandlers[this.state.state].hasOwnProperty(actionName))
     {
-      actionHandlers[this.state.state][actionName]();
+      return actionHandlers[this.state.state][actionName]();
     }
   }
 
-  handleLongPress(e) {
-    const actionName = e.target.className;
+  handleLongAction(actionName, isStarting) {
+    DEBUG && console.log(actionName, isStarting ? 'on' : 'off');
 
-    DEBUG && console.log(actionName + ' button', e.type === 'mousedown' ? 'on' : 'off');
+    if (isStarting) {
+      if (this.keys[actionName]) return;
 
-    if (e.type === 'mousedown') {
-      this.runAction(actionName);
-
-      this.keys[actionName] = setInterval(() => {
-        this.runAction(actionName);
-      }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
+      if (this.runAction(actionName)) {
+        this.keys[actionName] = setInterval(() => {
+          this.runAction(actionName);
+        }, CONTROLS_REPEAT_DELAY);
+      }
     } else {
       clearInterval(this.keys[actionName]);
+      this.keys[actionName] = null;
     }
   }
 
-  handleShortPress(e) {
-    DEBUG && console.log(e.target.className + ' button');
-    this.runAction(e.target.className);
+  handleShortAction(actionName) {
+    DEBUG && console.log(actionName + ' button');
+    this.runAction(actionName);
   }
 
   handleButtonPress = (e) => { // fix App as context
-    if (e.type === 'click') {
-      this.handleShortPress(e);
-    } else {
-      this.handleLongPress(e);
-    }
+    this.handleLongAction(e.target.className, e.type === 'mousedown');
   }
 
   handleKeyboard = (e) => { // fix App as context
@@ -394,7 +391,7 @@ class App extends React.Component {
 
     if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
       e.preventDefault();
-      this.runAction(KEYBOARD_KEYS[e.code]);
+      this.handleLongAction(KEYBOARD_KEYS[e.code], e.type === 'keydown');
     }
   }
 
@@ -421,17 +418,17 @@ class App extends React.Component {
 
         <div className="controls">
           <div className="game-controls">
-            <Button type="start" onShortPress={this.handleButtonPress} />
+            <Button type="start" onPress={this.handleButtonPress} />
           </div>
 
           <div className="move-controls">
-            <Button type="left" onLongPress={this.handleButtonPress} />
-            <Button type="down" onLongPress={this.handleButtonPress} />
-            <Button type="right" onLongPress={this.handleButtonPress} />
+            <Button type="left" onPress={this.handleButtonPress} />
+            <Button type="down" onPress={this.handleButtonPress} />
+            <Button type="right" onPress={this.handleButtonPress} />
           </div>
 
           <div className="action-controls">
-            <Button type="rotate" onLongPress={this.handleButtonPress} />
+            <Button type="rotate" onPress={this.handleButtonPress} />
           </div>
         </div>
       </div>
