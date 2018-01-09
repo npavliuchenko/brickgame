@@ -13,6 +13,14 @@ class Button extends React.Component {
             label = 'start pause';
             break;
         }
+        case 'left' : {
+            label = 'left level';
+            break;
+        }
+        case 'right' : {
+            label = 'right speed';
+            break;
+        }
         default: {
             label = this.props.type;
         }

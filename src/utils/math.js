@@ -134,6 +134,28 @@ function clearLines(m, first, last) {
   return [linesToClear.length, result];
 }
 
+function generateLevel(height, width, level) {
+  const m = createMatrix(height, width);
+  const density = 0.75;
+
+  for (let i = Math.max(height - level, 0); i < height; i++) {
+    let counter = 0;
+
+    for (let j = 0; j < width; j++) {
+      let r = Math.random();
+      // console.log(i, j, r);
+      m[i][j] = r < density ? 1 : 0;
+      counter += m[i][j];
+    }
+
+    if (counter === width) m[i][random(width)] = 0;
+    if (counter === 0) m[i][random(width)] = 1;
+    // console.log(m[i]);
+  }
+
+  return m;
+}
+
 export {
   random,
   div,
@@ -142,5 +164,6 @@ export {
   rotateMatrix,
   mergeMatrix,
   hasOverflow,
-  clearLines
+  clearLines,
+  generateLevel
 };

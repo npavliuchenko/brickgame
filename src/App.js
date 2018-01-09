@@ -3,10 +3,10 @@ import React from 'react';
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
   CONTROLS_SENSIVITY, ROTATION_DEFAULT, FIGURES,
-  START_X_OFFSET, START_Y_OFFSET,
+  START_X_OFFSET, START_Y_OFFSET, MAX_SPEED, MAX_LEVEL,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
-  hasOverflow, clearLines, div} from './utils/math';
+  hasOverflow, clearLines, div, generateLevel} from './utils/math';
 import Screen from './components/Screen';
 import Button from './components/Button';
 
@@ -42,8 +42,8 @@ class App extends React.Component {
       current: null,
       next: [[0]],
       score: 'hello',
-      speed: 1,
-      level: 1,
+      speed: 0,
+      level: 0,
       rotation: ROTATION_DEFAULT
     }
 
@@ -56,9 +56,10 @@ class App extends React.Component {
     this.didNothingOnPreviousTick = false;
     this.isBusy = false;
     this.ticks = [];
+    this.initialSpeed = this.state.speed;
 
     this.setState({
-      board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
+      board: generateLevel(BOARD_HEIGHT, BOARD_WIDTH, this.state.level),
       current: { // fake figure outside the board to start the 'tick' loop
         figure: [[1]],
         x: START_X_OFFSET,
@@ -102,7 +103,7 @@ class App extends React.Component {
   }
 
   _getDelayFromSpeed(speed) {
-    return SPEED_DELAY_BASIC - (speed - 1) * SPEED_DELAY_CHANGE;
+    return SPEED_DELAY_BASIC - (speed) * SPEED_DELAY_CHANGE;
   }
 
   componentDidMount() {
@@ -173,7 +174,7 @@ class App extends React.Component {
         );
 
         const newScore = prevState.score + SCORE_BONUS[linesCleared];
-        const newSpeed = Math.min(9, div(newScore, SPEED_SWITCH_SCORE) + 1);
+        const newSpeed = Math.min(9, div(newScore, SPEED_SWITCH_SCORE) + this.initialSpeed);
 
         DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared] + ' points are gotten');
         DEBUG && linesCleared && console.log(newScore + ' points', 'new speed is ' + newSpeed);
@@ -304,7 +305,7 @@ class App extends React.Component {
     });
   }
 
-  switchRotation() {
+  handleRotationSwitch() {
     this.setState((prevState, props) => {
       DEBUG && console.log('rotation direction changed');
 
@@ -312,6 +313,18 @@ class App extends React.Component {
         rotation: prevState.rotation > 0 ? -1 : 1
       };
     });
+  }
+
+  handleSpeedChange() {
+    this.setState((prevState, props) => ({
+      speed: prevState.speed < MAX_SPEED ? prevState.speed + 1 : 0
+    }));
+  }
+
+  handleLevelChange() {
+    this.setState((prevState, props) => ({
+      level: prevState.level < MAX_LEVEL ? prevState.level + 1 : 0
+    }));
   }
 
   runAction(actionName) {
@@ -326,11 +339,13 @@ class App extends React.Component {
     };
     actionHandlers[STATE_OFF] = {
       start:  () => { this.handleStart() },
-      rotate: () => { this.switchRotation() }
+      rotate: () => { this.handleRotationSwitch() },
+      right:  () => { this.handleSpeedChange() },
+      left:   () => { this.handleLevelChange() },
     };
     actionHandlers[STATE_PAUSE] = {
       start:  () => { this.handleStart() },
-      rotate: () => { this.switchRotation() }
+      rotate: () => { this.handleRotationSwitch() },
     };
 
     DEBUG && console.log(this.state.state, actionName);

@@ -195,3 +195,27 @@ test('clearLines(m, first, last)', () => {
   expect(M.clearLines(m2, 3, 4)).toEqual([1, [[0,0,0],[1,0,1],[1,1,1],[0,0,1],[1,1,0]]]);
   expect(M.clearLines(m2, 4, 4)).toEqual([1, [[0,0,0],[1,0,1],[1,1,1],[0,0,1],[1,1,0]]]);
 });
+
+test('generateLevel(h, w, lvl)', () => {
+  function testLevel(m, lvl) {
+    const h = m.length;
+    const w = m[0].length;
+    const row0 =  Array(w).fill(0);
+    const row1 =  Array(w).fill(1);
+
+    for (let i = 0; i < h - lvl; i++) {
+      expect(m[i]).toEqual(row0);
+    }
+
+    for (let i = h - lvl; i < h; i++) {
+      expect(m[i]).not.toEqual(row0);
+      expect(m[i]).not.toEqual(row1);
+    }
+
+  }
+
+  testLevel(M.generateLevel(7, 5, 1), 1);
+  testLevel(M.generateLevel(7, 5, 3), 3);
+  testLevel(M.generateLevel(7, 5, 8), 7);
+  testLevel(M.generateLevel(7, 5, 0), 0);
+});
