@@ -335,9 +335,9 @@ class App extends React.Component {
 
     actionHandlers[STATE_PLAY] = {
       start:  () => { this.handleStart() },
-      left:   () => { this.handleMove(-1) },
-      down:   () => { this.tick() },
-      right:  () => { this.handleMove(1) },
+      left:   () => { this.handleMove(-1); return true }, // return true for repeatable actions
+      down:   () => { this.tick(); return true },
+      right:  () => { this.handleMove(1); return true },
       rotate: () => { this.handleRotate() }
     };
     actionHandlers[STATE_OFF] = {
@@ -356,7 +356,7 @@ class App extends React.Component {
     if (actionHandlers.hasOwnProperty(this.state.state)
       && actionHandlers[this.state.state].hasOwnProperty(actionName))
     {
-      actionHandlers[this.state.state][actionName]();
+      return actionHandlers[this.state.state][actionName]();
     }
   }
 
@@ -366,11 +366,11 @@ class App extends React.Component {
     if (isStarting) {
       if (this.keys[actionName]) return;
 
-      this.runAction(actionName);
-
-      this.keys[actionName] = setInterval(() => {
-        this.runAction(actionName);
-      }, CONTROLS_REPEAT_DELAY); //this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
+      if (this.runAction(actionName)) {
+        this.keys[actionName] = setInterval(() => {
+          this.runAction(actionName);
+        }, CONTROLS_REPEAT_DELAY);
+      }
     } else {
       clearInterval(this.keys[actionName]);
       this.keys[actionName] = null;
