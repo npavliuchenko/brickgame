@@ -2,7 +2,7 @@ import React from 'react';
 
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
-  CONTROLS_SENSIVITY, CONTROLS_REPEAT_DELAY, ROTATION_DEFAULT, FIGURES,
+  CONTROLS_REPEAT_DELAY, ROTATION_DEFAULT, FIGURES,
   MAX_SPEED, MAX_LEVEL,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
@@ -383,11 +383,7 @@ class App extends React.Component {
   }
 
   handleButtonPress = (e) => { // fix App as context
-    if (e.type === 'click') {
-      this.handleShortAction(e.target.className);
-    } else {
-      this.handleLongAction(e.target.className, e.type === 'mousedown');
-    }
+    this.handleLongAction(e.target.className, e.type === 'mousedown');
   }
 
   handleKeyboard = (e) => { // fix App as context
@@ -396,7 +392,6 @@ class App extends React.Component {
     if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
       e.preventDefault();
       this.handleLongAction(KEYBOARD_KEYS[e.code], e.type === 'keydown');
-      // this.runAction(KEYBOARD_KEYS[e.code]);
     }
   }
 
@@ -423,17 +418,17 @@ class App extends React.Component {
 
         <div className="controls">
           <div className="game-controls">
-            <Button type="start" onShortPress={this.handleButtonPress} />
+            <Button type="start" onPress={this.handleButtonPress} />
           </div>
 
           <div className="move-controls">
-            <Button type="left" onLongPress={this.handleButtonPress} />
-            <Button type="down" onLongPress={this.handleButtonPress} />
-            <Button type="right" onLongPress={this.handleButtonPress} />
+            <Button type="left" onPress={this.handleButtonPress} />
+            <Button type="down" onPress={this.handleButtonPress} />
+            <Button type="right" onPress={this.handleButtonPress} />
           </div>
 
           <div className="action-controls">
-            <Button type="rotate" onLongPress={this.handleButtonPress} />
+            <Button type="rotate" onPress={this.handleButtonPress} />
           </div>
         </div>
       </div>

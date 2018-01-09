@@ -29,9 +29,8 @@ class Button extends React.Component {
     return (
         <button
             className={this.props.type}
-            onClick={this.props.onShortPress}
-            onMouseDown={this.props.onLongPress}
-            onMouseUp={this.props.onLongPress}
+            onMouseDown={this.props.onPress}
+            onMouseUp={this.props.onPress}
         >
             <span>{label}</span>
         </button>
