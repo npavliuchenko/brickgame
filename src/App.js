@@ -191,7 +191,7 @@ class App extends React.Component {
           current: {
             figure: prevState.next,
             x: Math.floor((BOARD_WIDTH - prevState.next[0].length) / 2),
-            y: Math.floor(prevState.next.length / 2)
+            y: -Math.floor(prevState.next.length / 2)
           },
           next: this._getRandomFigure(),
           score: newScore,
