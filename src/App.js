@@ -108,12 +108,12 @@ class App extends React.Component {
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyboard);
-    // document.addEventListener('keyup', this.handleKeyboard);
+    document.addEventListener('keyup', this.handleKeyboard);
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyboard);
-    // document.removeEventListener('keyup', this.handleKeyboard);
+    document.removeEventListener('keyup', this.handleKeyboard);
   }
 
   //@TODO: remove after debugging
@@ -360,12 +360,12 @@ class App extends React.Component {
     }
   }
 
-  handleLongPress(e) {
-    const actionName = e.target.className;
+  handleLongAction(actionName, isStarting) {
+    DEBUG && console.log(actionName, isStarting ? 'on' : 'off');
 
-    DEBUG && console.log(actionName + ' button', e.type === 'mousedown' ? 'on' : 'off');
+    if (isStarting) {
+      if (this.keys[actionName]) return;
 
-    if (e.type === 'mousedown') {
       this.runAction(actionName);
 
       this.keys[actionName] = setInterval(() => {
@@ -373,19 +373,37 @@ class App extends React.Component {
       }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
     } else {
       clearInterval(this.keys[actionName]);
+      this.keys[actionName] = null;
     }
   }
 
-  handleShortPress(e) {
-    DEBUG && console.log(e.target.className + ' button');
-    this.runAction(e.target.className);
+  handleLongPress(e, eventSource) {
+    const actionName = e.target.className;
+    e.preventDefault();
+
+    DEBUG && console.log(actionName + ' ' + eventSource, e.type === (eventSource + 'down') ? 'on' : 'off');
+
+    if (e.type === eventSource + 'mousedown') {
+      this.runAction(actionName);
+
+      this.keys[eventSource + actionName] = setInterval(() => {
+        this.runAction(actionName);
+      }, this._getDelayFromSpeed(this.state.speed) / CONTROLS_SENSIVITY);
+    } else {
+      clearInterval(this.keys[eventSource + actionName]);
+    }
+  }
+
+  handleShortAction(actionName) {
+    DEBUG && console.log(actionName + ' button');
+    this.runAction(actionName);
   }
 
   handleButtonPress = (e) => { // fix App as context
     if (e.type === 'click') {
-      this.handleShortPress(e);
+      this.handleShortAction(e.target.className);
     } else {
-      this.handleLongPress(e);
+      this.handleLongAction(e.target.className, e.type === 'mousedown');
     }
   }
 
@@ -394,7 +412,8 @@ class App extends React.Component {
 
     if (KEYBOARD_KEYS.hasOwnProperty(e.code)) {
       e.preventDefault();
-      this.runAction(KEYBOARD_KEYS[e.code]);
+      this.handleLongAction(KEYBOARD_KEYS[e.code], e.type === 'keydown');
+      // this.runAction(KEYBOARD_KEYS[e.code]);
     }
   }
 
