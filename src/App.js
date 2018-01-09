@@ -124,6 +124,7 @@ class App extends React.Component {
   // update game state
   tick() {
     const t0 = performance.now();
+    let isGameOver = false;
 
     //@TODO: cancel if game over (on high speeds)
     // if (this.state.state !== STATE_PLAY) return;
@@ -156,7 +157,7 @@ class App extends React.Component {
       } else {
         // check for game over
         if (this.didNothingOnPreviousTick) {
-          this.gameOver();
+          isGameOver = true;
           return;
         }
 
@@ -202,12 +203,15 @@ class App extends React.Component {
       return newState;
     });
 
+    if (isGameOver) this.gameOver();
+
     const t1 = performance.now();
     this.ticks.push(t1 - t0);
     DEBUG && console.log('tick was ' + (t1 - t0) + ' ms');
   }
 
   gameOver() {
+    console.log('gameOver()');
     // recursive timeout for board animation
     const clearBoard = (iteration) => {
       this.setState((prevState, props) => {
