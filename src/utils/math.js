@@ -52,6 +52,7 @@ function rotateMatrixCCW(m) {
 }
 
 function rotateMatrix(m, angle) { // angle > 0 ? CW : CCW
+  //@TODO: we can use pre-defined matrix for these if better rotation is required
   let result = copyMatrix(m);
 
   for (let i = 0 ; i < Math.abs(angle); i++) {
