@@ -3,7 +3,7 @@ import React from 'react';
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
   CONTROLS_SENSIVITY, ROTATION_DEFAULT, FIGURES,
-  START_X_OFFSET, START_Y_OFFSET, MAX_SPEED, MAX_LEVEL,
+  MAX_SPEED, MAX_LEVEL,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
   hasOverflow, clearLines, div, generateLevel} from './utils/math';
@@ -62,7 +62,7 @@ class App extends React.Component {
       board: generateLevel(BOARD_HEIGHT, BOARD_WIDTH, this.state.level),
       current: { // fake figure outside the board to start the 'tick' loop
         figure: [[1]],
-        x: START_X_OFFSET,
+        x: 0,
         y: BOARD_HEIGHT
       },
       next: this._getRandomFigure(),
@@ -190,8 +190,8 @@ class App extends React.Component {
           board: board,
           current: {
             figure: prevState.next,
-            x: START_X_OFFSET,
-            y: START_Y_OFFSET
+            x: Math.floor((BOARD_WIDTH - prevState.next[0].length) / 2),
+            y: Math.floor(prevState.next.length / 2)
           },
           next: this._getRandomFigure(),
           score: newScore,
@@ -211,7 +211,6 @@ class App extends React.Component {
   }
 
   gameOver() {
-    console.log('gameOver()');
     // recursive timeout for board animation
     const clearBoard = (iteration) => {
       this.setState((prevState, props) => {
@@ -237,7 +236,7 @@ class App extends React.Component {
     // reset figures
     this.setState({
       state: STATE_BUSY,
-      next: createMatrix(FIGURES[0].length, FIGURES[0][0].length),
+      next: [[0]],
       current: null
     });
 

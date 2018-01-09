@@ -1,5 +1,5 @@
 import * as M from './math';
-import {BOARD_WIDTH, BOARD_HEIGHT, START_X_OFFSET} from './constants';
+import {BOARD_WIDTH, BOARD_HEIGHT} from './constants';
 
 test('random(max)', () => {
   // test the random values interval
@@ -157,7 +157,7 @@ test('hasOverflow(container, insertion, yOffset, xOffset)', () => {
   expect(M.hasOverflow(e2, m2, 6, 3)).toEqual(false);
 
   // initial position test
-  expect(M.hasOverflow(e0, m0, BOARD_HEIGHT, START_X_OFFSET)).toEqual(true);
+  expect(M.hasOverflow(e0, m0, BOARD_HEIGHT, 0)).toEqual(true);
 });
 
 test('clearLines(m, first, last)', () => {
