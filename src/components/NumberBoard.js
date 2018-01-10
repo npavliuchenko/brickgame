@@ -38,6 +38,7 @@ class NumberBoard extends React.Component {
       'v': [0,1,1,0,1,1,1],
       'r': [1,1,0,0,1,0,0],
       'i': [0,0,1,0,0,1,0],
+      't': [0,1,0,1,1,0,1],
     };
 
     let result = [];

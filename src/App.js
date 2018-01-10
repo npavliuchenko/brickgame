@@ -56,6 +56,7 @@ class App extends React.Component {
     };
 
     this.keys = {};
+    this.highscore = this.loadHighScore();
 
     DEBUG && console.log(this);
   }
@@ -252,7 +253,7 @@ class App extends React.Component {
       }
     }
 
-    DEBUG && console.log('game over', 'score: ' + this.state.score);
+    DEBUG && console.log('game over', 'score: ' + this.state.score, this.highscore);
 
     // stop game
     // this.handleStart('pause');
@@ -265,6 +266,10 @@ class App extends React.Component {
       next: [[0]],
       current: null,
     });
+    // save highscore
+    if (this.state.score > this.highscore) {
+      this.saveHighScore(this.state.score);
+    }
 
     // run animation
     clearBoard(this.state.board.length - 1);
@@ -494,6 +499,18 @@ class App extends React.Component {
     return true;
   }
 
+  saveHighScore(score) {
+    this.highscore = score;
+
+    if (!supportsLocalStorage()) return;
+    window.localStorage[STORAGE_PREFFIX + '.highscore'] = score;
+  }
+
+  loadHighScore() {
+    if (!supportsLocalStorage()) return 0;
+    return parseInt(window.localStorage[STORAGE_PREFFIX + '.highscore'], 10) || 0;
+  }
+
   render() {
     const boardState = this.state.current ?
       mergeMatrix(
@@ -504,24 +521,19 @@ class App extends React.Component {
       ) :
       this.state.board;
 
-    const scoreText =
-      this.state.state === STATE_PAUSE ?
-        [this.state.score, 'pause'] :
-      this.state.state === STATE_OFF ?
-        (this.state.score ? this.state.score : 'hello' ) :
-      this.state.state === STATE_BUSY ?
-        'ha-ha' :
-      this.state.score;
+
 
     return (
       <div className="app">
         <Screen
+          gamestate={this.state.state}
           board={boardState}
           next={this.state.next}
-          score={scoreText}
+          score={this.state.score}
           speed={this.state.speed}
           level={this.state.level}
           rotation={this.state.rotation > 0 ? 'cw' : 'ccw'}
+          highscore={this.highscore}
         />
 
         <div className="controls">
