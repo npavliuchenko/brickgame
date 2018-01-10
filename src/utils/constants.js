@@ -18,6 +18,8 @@ const ROTATION_DEFAULT = 1; // ClockWise
 
 const SCORE_DIGITS = 6;
 
+const STORAGE_PREFFIX = 'tetris';
+
 const FIGURES = [
   [ [0,1,0,0],  // I
     [0,1,0,0],
@@ -84,6 +86,7 @@ export {
   MAX_LEVEL,
   ROTATION_DEFAULT,
   SCORE_DIGITS,
+  STORAGE_PREFFIX,
   FIGURES,
   KEYBOARD_KEYS,
   SCORE_BONUS,

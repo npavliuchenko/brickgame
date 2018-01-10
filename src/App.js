@@ -3,7 +3,7 @@ import React from 'react';
 import {STATE_OFF, STATE_BUSY, STATE_PLAY, STATE_PAUSE,
   BOARD_WIDTH, BOARD_HEIGHT, SPEED_DELAY_BASIC, SPEED_DELAY_CHANGE,
   CONTROLS_REPEAT_DELAY, ROTATION_DEFAULT, FIGURES,
-  MAX_SPEED, MAX_LEVEL,
+  MAX_SPEED, MAX_LEVEL, STORAGE_PREFFIX,
   KEYBOARD_KEYS, SCORE_BONUS, SPEED_SWITCH_SCORE} from './utils/constants';
 import {random, createMatrix, copyMatrix, rotateMatrix, mergeMatrix,
   hasOverflow, clearLines, div, generateLevel} from './utils/math';
@@ -33,6 +33,14 @@ function printTimingStats(intervalsArray) {
   );
 }
 
+function supportsLocalStorage() {
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch (e) {
+    return false;
+  }
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -54,7 +62,6 @@ class App extends React.Component {
 
   initGame() {
     this.didNothingOnPreviousTick = false;
-    this.isBusy = false;
     this.ticks = [];
     this.initialSpeed = this.state.speed;
 
@@ -106,9 +113,26 @@ class App extends React.Component {
     return SPEED_DELAY_BASIC - (speed) * SPEED_DELAY_CHANGE;
   }
 
+  _getSpeedByScore(score, initialSpeed) {
+    return Math.min(MAX_SPEED, div(score, SPEED_SWITCH_SCORE) + initialSpeed);
+  }
+
+  _getFigureWithOffsets(figure) {
+    return {
+      figure: figure,
+      x: Math.floor((BOARD_WIDTH - figure[0].length) / 2),
+      y: -Math.floor(figure.length / 2)
+    }
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyboard);
     document.addEventListener('keyup', this.handleKeyboard);
+
+    if (this.resumeGame()) {
+      this.didNothingOnPreviousTick = false;
+      this.ticks = [];
+    };
   }
 
   componentWillUnmount() {
@@ -154,6 +178,7 @@ class App extends React.Component {
         }
 
       // if current figure is already down ...
+      // this branch takes ~10ms
       } else {
         // check for game over
         if (this.didNothingOnPreviousTick) {
@@ -175,7 +200,7 @@ class App extends React.Component {
         );
 
         const newScore = prevState.score + SCORE_BONUS[linesCleared];
-        const newSpeed = Math.min(9, div(newScore, SPEED_SWITCH_SCORE) + this.initialSpeed);
+        const newSpeed = this._getSpeedByScore(newScore, this.initialSpeed);
 
         DEBUG && console.log(linesCleared + ' lines cleared', SCORE_BONUS[linesCleared] + ' points are gotten');
         DEBUG && linesCleared && console.log(newScore + ' points', 'new speed is ' + newSpeed);
@@ -188,15 +213,13 @@ class App extends React.Component {
         // update next & current figures, score
         newState = {
           board: board,
-          current: {
-            figure: prevState.next,
-            x: Math.floor((BOARD_WIDTH - prevState.next[0].length) / 2),
-            y: -Math.floor(prevState.next.length / 2)
-          },
+          current: this._getFigureWithOffsets(prevState.next),
           next: this._getRandomFigure(),
           score: newScore,
           speed: newSpeed
         }
+
+        this.saveGame(true, newState);
       }
 
       this.didNothingOnPreviousTick = !canMove;
@@ -233,6 +256,8 @@ class App extends React.Component {
 
     // stop game
     this.handleStart('pause');
+    // clear saved game
+    this.saveGame(false);
     // reset figures
     this.setState({
       state: STATE_BUSY,
@@ -393,6 +418,77 @@ class App extends React.Component {
       e.preventDefault();
       this.handleLongAction(KEYBOARD_KEYS[e.code], e.type === 'keydown');
     }
+  }
+
+  saveGame(isRunning, state) {
+    function saveValue(key, v) {
+      window.localStorage[STORAGE_PREFFIX + '.game.' + key] = v;
+    }
+
+    function saveMatrix(m, key) {
+      for (let i = 0; i < m.length; i++) {
+        for (let j = 0; j < m[0].length; j++) {
+          saveValue(key + '.' + i + '.' + j, m[i][j]);
+        }
+      }
+
+      saveValue(key + '.w', m[0].length);
+      saveValue(key + '.h', m.length);
+    }
+
+    if (!supportsLocalStorage()) return;
+
+    saveValue('running', isRunning ? '1' : '');
+
+    if (!isRunning) return;
+
+    saveMatrix('board',   state.board);
+    saveMatrix('current', state.current.figure);
+    saveMatrix('next',    state.next);
+    saveValue('score',    state.score);
+    saveValue('speed0',   this.initialSpeed);
+    saveValue('level',    this.state.level);
+    saveValue('rotation', this.state.rotation);
+  }
+
+  resumeGame() {
+    function loadValue(key) {
+      return parseInt(window.localStorage[STORAGE_PREFFIX + '.game.' + key], 10);
+    }
+
+    function loadMatrix(key) {
+      const w = loadValue(key + '.w');
+      const h = loadValue(key + '.h');
+      const m = createMatrix(h, w);
+
+      for (let i = 0; i < h; i++) {
+        for (let j = 0; j < w; j++) {
+          m[i][j] = loadValue(key + '.' + i + '.' + j);
+        }
+      }
+
+      return m;
+    }
+
+    if (!supportsLocalStorage() || !loadValue('running')) return false;
+
+    const score = loadValue('score');
+    const initialSpeed = loadValue('speed0');
+
+    this.setState({
+      state: STATE_PAUSE,
+      board: loadMatrix('board'),
+      current: this._getFigureWithOffsets(loadMatrix('current')),
+      next: loadMatrix('next'),
+      score: score,
+      speed: this._getSpeedByScore(score, initialSpeed),
+      level: loadValue('level'),
+      rotation: loadValue('rotation')
+    });
+
+    this.initialSpeed = initialSpeed;
+
+    return true;
   }
 
   render() {
