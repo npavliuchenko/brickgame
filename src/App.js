@@ -49,7 +49,7 @@ class App extends React.Component {
       board: createMatrix(BOARD_HEIGHT, BOARD_WIDTH),
       current: null,
       next: [[0]],
-      score: 'hello',
+      score: 0,
       speed: 0,
       level: 0,
       rotation: ROTATION_DEFAULT
@@ -255,14 +255,15 @@ class App extends React.Component {
     DEBUG && console.log('game over', 'score: ' + this.state.score);
 
     // stop game
-    this.handleStart('pause');
+    // this.handleStart('pause');
+    clearInterval(this.gameTimer);
     // clear saved game
     this.saveGame(false);
     // reset figures
     this.setState({
       state: STATE_BUSY,
       next: [[0]],
-      current: null
+      current: null,
     });
 
     // run animation
@@ -503,12 +504,21 @@ class App extends React.Component {
       ) :
       this.state.board;
 
+    const scoreText =
+      this.state.state === STATE_PAUSE ?
+        [this.state.score, 'pause'] :
+      this.state.state === STATE_OFF ?
+        (this.state.score ? this.state.score : 'hello' ) :
+      this.state.state === STATE_BUSY ?
+        'ha-ha' :
+      this.state.score;
+
     return (
       <div className="app">
         <Screen
           board={boardState}
           next={this.state.next}
-          score={this.state.score}
+          score={scoreText}
           speed={this.state.speed}
           level={this.state.level}
           rotation={this.state.rotation > 0 ? 'cw' : 'ccw'}
