@@ -53,7 +53,7 @@ class App extends React.Component {
       speed: 0,
       level: 0,
       rotation: ROTATION_DEFAULT
-    }
+    };
 
     this.keys = {};
 
@@ -421,11 +421,13 @@ class App extends React.Component {
   }
 
   saveGame(isRunning, state) {
+    DEBUG && console.log('saving', isRunning);
+
     function saveValue(key, v) {
       window.localStorage[STORAGE_PREFFIX + '.game.' + key] = v;
     }
 
-    function saveMatrix(m, key) {
+    function saveMatrix(key, m) {
       for (let i = 0; i < m.length; i++) {
         for (let j = 0; j < m[0].length; j++) {
           saveValue(key + '.' + i + '.' + j, m[i][j]);
