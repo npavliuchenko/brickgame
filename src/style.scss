@@ -10,7 +10,58 @@ $color-screen: #BEC3B5;
 $color-passive-digit: #A3A39A;
 $color-active-digit: #313131;
 
-$digit-size: 20px;
+// $digit-size: 20px;
+$digit-size: 2.5vh;
 
 $font-controls: Arial, Helvetica, sans-serif; //@TODO
 $font-screen: "Lucida Console", Monaco, monospace; //@TODO
+
+
+$breakpoint-digits: 700px;
+
+
+/*
+ * Screen
+ */
+
+// general screen elements
+$screen-padding: $digit-size * 0.5;
+$screen-facet-vert: $digit-size * 0.5;
+$screen-facet-hor: $digit-size;
+$screen-border-padding: $digit-size * 0.5;
+$screen-info-width: $digit-size * 5;
+$screen-title-size: $digit-size * 1.2;
+$screen-decoration-ratio: 10.24;
+
+$indicators-right-offset: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
+
+$digit-margin: 2px;
+$digit-border: 2px;
+$digit-padding: 2px;
+
+$digit-margin-sm: 1px;
+$digit-border-sm: 2px;
+$digit-padding-sm: 2px;
+
+$board-border: 2px;
+$board-width: $digit-size * 10;
+$board-height: $digit-size * 20;
+
+$segment-size: $digit-size / 1.5;
+$segment-facet: 1px;
+$segment-margin: 1px;
+
+$arrow-radius: 20px;
+$arrow-weight: 2px;
+$arrow-wing: 4px;
+$arrow-wing-compensation: 0.25 * $arrow-weight;
+$sqrt2: 1.4142;
+
+/*
+ * Controls
+ */
+
+$controls-panel-width: $board-width + $screen-info-width
+    + $screen-facet-hor * 4
+    + $screen-border-padding * 2
+    + $board-height / $screen-decoration-ratio * 2;
