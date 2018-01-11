@@ -29,7 +29,7 @@ $score-height: $segment-size * 2;
   background: $color-screen;
   width: $board-width + $screen-info-width + $board-border * 2;
   padding: 10px;
-  margin: ($screen-border-padding * 2) auto ($screen-border-padding * 3);
+  margin: 0 auto ($screen-border-padding * 3);
   position: relative;
 
   font-family: $font-screen;
