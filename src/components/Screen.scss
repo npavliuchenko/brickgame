@@ -3,7 +3,9 @@
 $screen-padding: 10px;
 $screen-facet-vert: 10px;
 $screen-facet-hor: 20px;
+$screen-border-padding: 20px;
 $screen-info-width: $digit-size * 5;
+$screen-title-size: 24px;
 
 $info-right-offset: $screen-padding + ($screen-info-width - $digit-size * 4) / 2;
 
@@ -27,7 +29,7 @@ $score-height: $segment-size * 2;
   background: $color-screen;
   width: $board-width + $screen-info-width + $board-border * 2;
   padding: 10px;
-  margin: 0 auto;
+  margin: ($screen-border-padding * 2) auto ($screen-border-padding * 3);
   position: relative;
 
   font-family: $font-screen;
@@ -45,11 +47,11 @@ $score-height: $segment-size * 2;
   .decor-left,
   .decor-right {
     position: absolute;
-    top: -$screen-facet-vert;
+    top: -($screen-facet-vert + $screen-border-padding);
     color: $color-label;
-    height: calc(100% + #{$screen-facet-vert * 2});
+    height: calc(100% + #{$screen-facet-vert * 2 + $screen-border-padding * 2});
     width: auto;
-    margin: 0 ($screen-facet-hor * 2);
+    margin: 0 ($screen-facet-hor * 2 + $screen-border-padding);
   }
 
   .decor-left {
@@ -58,7 +60,31 @@ $score-height: $segment-size * 2;
 
   .decor-right {
     left: 100%;
+  }
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: -($screen-facet-vert + $screen-border-padding);
+    bottom: -($screen-facet-vert + $screen-border-padding);
+    left: -($screen-facet-hor + $screen-border-padding);
+    right: -($screen-facet-hor + $screen-border-padding);
+    border: 1px solid $color-accent;
+  }
+
+  &::after {
+    content: 'play me';
+    font-family: $font-controls;
+    font-size: $screen-title-size;
+    line-height: $screen-title-size;
+    color: $color-label;
+    background: $color-body;
+    padding: 0 ($screen-border-padding / 2);
+
+    position: absolute;
+    top: -($screen-facet-vert + $screen-border-padding + 0.5 * $screen-title-size);
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
